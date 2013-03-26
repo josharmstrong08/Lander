@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Lander
+namespace LanderSimulator
 {
     public class Environment
     {
@@ -25,7 +25,7 @@ namespace Lander
         /// </summary>
         public void Update()
         {
-
+            // NYI
         }
 
         /// <summary>

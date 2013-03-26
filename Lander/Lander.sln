@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lander", "Lander\Lander.csproj", "{98644067-F9D9-4443-A555-6497FA661F2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F23E66B2-6FE2-47A6-83F7-91CE55B37880}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanderUI", "LanderUI\LanderUI.csproj", "{832B4D7E-7886-4EFE-93D0-89AB952F072C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{98644067-F9D9-4443-A555-6497FA661F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98644067-F9D9-4443-A555-6497FA661F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98644067-F9D9-4443-A555-6497FA661F2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Release|Any CPU.Build.0 = Release|Any CPU
+		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

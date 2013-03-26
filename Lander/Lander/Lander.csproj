@@ -8,8 +8,8 @@
     <ProjectGuid>{98644067-F9D9-4443-A555-6497FA661F2D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lander</RootNamespace>
-    <AssemblyName>Lander</AssemblyName>
+    <RootNamespace>LanderSimulator</RootNamespace>
+    <AssemblyName>LanderSimulator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile2</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

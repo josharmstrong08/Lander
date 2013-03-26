@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Lander
+namespace LanderSimulator
 {
     public enum LanderStatus
     {
@@ -26,9 +26,15 @@ namespace Lander
 
         private double fuel;
 
+        private double startingFuel;
+
         private double positionX;
 
         private double positionY;
+
+        private double startingPositionX;
+
+        private double startingPositionY;
 
         private Environment environment;
 
@@ -49,20 +55,26 @@ namespace Lander
         /// <summary>
         /// Contrustor for the Lander class. 
         /// </summary>
-        /// <param name="enviroment"></param>
-        public Lander(Environment enviroment)
+        /// <param name="environment"></param>
+        public Lander(Environment environment, double fuel, double positionx, double positiony)
         {
-            this.PositionY = 100;
-            this.PositionX = 0;
+            // Load up with reasonable values
+            this.PositionX = positionx;
+            this.PositionY = positiony;
+            this.startingPositionX = positionx;
+            this.startingPositionY = positiony;
             this.Status = LanderStatus.Flying;
-            this.Fuel = 100;
+            this.Fuel = fuel;
+            this.startingFuel = fuel;
             this.CurrentTime = 0;
             this.VelocityX = 0;
             this.VelocityY = 0;
             this.MaxLandingVelocity = 4.0;
             this.MinSafeX = -0.2;
             this.MaxSafeX = 0.2;
-            this.Enviroment = enviroment;
+            this.Enviroment = environment;
+            this.Thrust = 0;
+            this.Burn = 0;
         }
 
         /// <summary>
@@ -110,6 +122,23 @@ namespace Lander
             }
 
             return this.Status;
+        }
+
+        /// <summary>
+        /// Reset all internal values back to their initial state. (Velocity,
+        /// Fuel, CurrentTime). 
+        /// </summary>
+        public void Reset()
+        {
+            this.CurrentTime = 0;
+            this.Fuel = this.startingFuel;
+            this.VelocityX = 0;
+            this.VelocityY = 0;
+            this.PositionX = this.startingPositionX;
+            this.PositionY = this.startingPositionY;
+            this.Status = LanderStatus.Flying;
+            this.Thrust = 0;
+            this.Burn = 0;
         }
 
         /// <summary>
