@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanderUI", "LanderUI\LanderUI.csproj", "{832B4D7E-7886-4EFE-93D0-89AB952F072C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtificialNeuralNetwork", "ArtificialNeuralNetwork\ArtificialNeuralNetwork.csproj", "{36EA86C0-57BF-414D-903D-7FBBAC85665F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{832B4D7E-7886-4EFE-93D0-89AB952F072C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
