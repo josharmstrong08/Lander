@@ -53,7 +53,8 @@ namespace LanderUI.ViewModel
         {
             this.enviromenment = new Environment();
             this.lander = new Lander(this.enviromenment, 100, 0, 100);
-            timer = new Timer(1000);
+            this.enviromenment.Gravity = .0322;
+            timer = new Timer(10);
             timer.Elapsed += new ElapsedEventHandler(UpdateLanderPosition);
             timer.AutoReset = true;
             timer.Start();
