@@ -52,8 +52,13 @@
   <ItemGroup>
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTest2.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ArtificialNeuralNetwork\ArtificialNeuralNetwork.csproj">
+      <Project>{36ea86c0-57bf-414d-903d-7fbbac85665f}</Project>
+      <Name>ArtificialNeuralNetwork</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lander\Lander.csproj">
       <Project>{98644067-f9d9-4443-a555-6497fa661f2d}</Project>
       <Name>Lander</Name>

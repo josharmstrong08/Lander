@@ -123,6 +123,22 @@ namespace LanderSimulator
 
             return this.Status;
         }
+        
+        /// <summary>
+        /// Calculates the fitness of the lander. If the lander is in the air then
+        /// the fitness is defined as -1. If it has landed, then the fitness is 
+        /// calculated based on the vertical velocity and distance from the landing
+        /// zone. Smaller fitnesses are better, and a fitness of 0 means the lander
+        /// has landed successfully. 
+        /// </summary>
+        /// <returns></returns>
+        public double CalculateFitness()
+        {
+            // TODO This equation is wrong
+            return Math.Min(0, this.VelocityY - this.MaxLandingVelocity) +
+                   Math.Min(0, this.PositionX - this.MinSafeX) +
+                   Math.Min(0, this.PositionX - this.MaxSafeX);
+        }
 
         /// <summary>
         /// Reset all internal values back to their initial state. (Velocity,

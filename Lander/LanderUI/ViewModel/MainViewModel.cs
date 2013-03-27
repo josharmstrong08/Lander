@@ -1,6 +1,9 @@
+using ArtificialNeuralNetwork;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LanderSimulator;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Timers;
 using System.Windows;
 
@@ -30,7 +33,7 @@ namespace LanderUI.ViewModel
         /// </summary>
         public const string LanderPositionYPropertyName = "LanderPositionY";
 
-        private LanderSimulator.Environment enviromenment;
+        private LanderSimulator.Environment environment;
 
         private Lander lander;
 
@@ -46,20 +49,26 @@ namespace LanderUI.ViewModel
 
         private RelayCommand stopCommand;
 
+        private NeuralNetwork neuralNetwork;
+
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
         public MainViewModel()
         {
-            this.enviromenment = new Environment();
-            this.lander = new Lander(this.enviromenment, 100, 0, 100);
-            this.enviromenment.Gravity = .0322;
+            this.environment = new Environment();
+            this.lander = new Lander(this.environment, 100, 0, 100);
+            this.environment.Gravity = .0322;
             timer = new Timer(10);
             timer.Elapsed += new ElapsedEventHandler(UpdateLanderPosition);
             timer.AutoReset = true;
-            timer.Start();
             this.LanderPositionX = this.lander.PositionX;
             this.LanderPositionY = this.lander.PositionY;
+            this.neuralNetwork = new NeuralNetwork();
+            // Set up the network for it's seven inputs and two outputs. 
+            this.neuralNetwork.InputCount = 7;
+            this.neuralNetwork.OutputCount = 2;
+            this.neuralNetwork.AddHiddenLayer(8);
         }
 
         /// <summary>
@@ -79,6 +88,14 @@ namespace LanderUI.ViewModel
             this.timer.Start();
             this.LanderPositionX = this.lander.PositionX;
             this.LanderPositionY = this.lander.PositionY;
+            //List<double> inputs = new List<double>();
+            //inputs.Add(1);
+            //inputs.Add(2);
+            //IList<double> output = neuralNetwork.Run(inputs);
+            //foreach (var num in output)
+            //{
+            //    Debug.WriteLine(num);
+            //}
         }
 
         private void ExecuteStopCommand()
@@ -96,7 +113,22 @@ namespace LanderUI.ViewModel
         /// <param name="args"></param>
         public void UpdateLanderPosition(object source, ElapsedEventArgs args)
         {
-            this.enviromenment.Update();
+            // First query the neural net to see how it reacts to the current conditions. 
+            // Then update the conditions. 
+
+            // height, xPosition, Yvelocity, Xvelocity, wind, acceleration, and fuel.
+            List<double> inputs = new List<double>();
+            inputs.Add(this.lander.PositionY);
+            inputs.Add(this.lander.PositionX);
+            inputs.Add(this.lander.VelocityY);
+            inputs.Add(this.lander.VelocityX);
+            inputs.Add(this.environment.WindSpeed);
+            inputs.Add(this.environment.Gravity);
+            inputs.Add(this.lander.Fuel);
+            IList<double> output = this.neuralNetwork.Run(inputs);
+            this.lander.Burn = output[0];
+            this.lander.Thrust = output[1];
+
             this.lander.Update();
             this.LanderPositionX = this.lander.PositionX;
             this.LanderPositionY = this.lander.PositionY;
@@ -104,6 +136,8 @@ namespace LanderUI.ViewModel
             {
                 this.timer.Stop();
             }
+
+            this.environment.Update();
         }
 
         /// <summary>
