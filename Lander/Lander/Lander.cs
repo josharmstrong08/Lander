@@ -131,13 +131,21 @@ namespace LanderSimulator
         /// zone. Smaller fitnesses are better, and a fitness of 0 means the lander
         /// has landed successfully. 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The fitness of the lander</returns>
         public double CalculateFitness()
         {
-            // TODO This equation is wrong
-            return Math.Min(0, this.VelocityY - this.MaxLandingVelocity) +
-                   Math.Min(0, this.PositionX - this.MinSafeX) +
-                   Math.Min(0, this.PositionX - this.MaxSafeX);
+            double fitness = Math.Min(0, this.VelocityY - this.MaxLandingVelocity);
+
+            if (this.PositionX < this.MinSafeX)
+            {
+                fitness += this.MinSafeX - this.PositionX;
+            }
+            else if (this.PositionX > this.MaxSafeX)
+            {
+                fitness += this.PositionX - this.MaxSafeX;
+            }
+
+            return fitness;
         }
 
         /// <summary>
