@@ -1,7 +1,8 @@
 using ArtificialNeuralNetwork;
+using GeneticAlgorithm;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using LanderSimulator;
+using Lander.Model;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
@@ -33,9 +34,9 @@ namespace LanderUI.ViewModel
         /// </summary>
         public const string LanderPositionYPropertyName = "LanderPositionY";
 
-        private LanderSimulator.Environment environment;
+        private Lander.Model.Environment environment;
 
-        private Lander lander;
+        private Lander.Model.Lander lander;
 
         private double landerPositionY = 0;
 
@@ -57,7 +58,7 @@ namespace LanderUI.ViewModel
         public MainViewModel()
         {
             this.environment = new Environment();
-            this.lander = new Lander(this.environment, 100, 0, 100);
+            this.lander = new Lander.Model.Lander(this.environment, 100, 0, 100);
             this.environment.Gravity = .0322;
             timer = new Timer(10);
             timer.Elapsed += new ElapsedEventHandler(UpdateLanderPosition);
@@ -69,6 +70,8 @@ namespace LanderUI.ViewModel
             this.neuralNetwork.InputCount = 7;
             this.neuralNetwork.OutputCount = 2;
             this.neuralNetwork.AddHiddenLayer(8);
+
+            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm();
         }
 
         /// <summary>

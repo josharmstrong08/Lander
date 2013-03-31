@@ -60,7 +60,7 @@
       <Name>ArtificialNeuralNetwork</Name>
     </ProjectReference>
     <ProjectReference Include="..\Lander\Lander.csproj">
-      <Project>{98644067-f9d9-4443-a555-6497fa661f2d}</Project>
+      <Project>{836aa207-f21e-46b1-9871-a02a34ae2e7b}</Project>
       <Name>Lander</Name>
     </ProjectReference>
   </ItemGroup>

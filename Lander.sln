@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lander", "Lander\Lander.csproj", "{98644067-F9D9-4443-A555-6497FA661F2D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F23E66B2-6FE2-47A6-83F7-91CE55B37880}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanderUI", "LanderUI\LanderUI.csproj", "{832B4D7E-7886-4EFE-93D0-89AB952F072C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtificialNeuralNetwork", "ArtificialNeuralNetwork\ArtificialNeuralNetwork.csproj", "{36EA86C0-57BF-414D-903D-7FBBAC85665F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticAlgorithm", "GeneticAlgorithm\GeneticAlgorithm.csproj", "{ADA412F8-475C-4010-B7EB-B6897D2294FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lander", "Lander\Lander.csproj", "{836AA207-F21E-46B1-9871-A02A34AE2E7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{98644067-F9D9-4443-A555-6497FA661F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98644067-F9D9-4443-A555-6497FA661F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98644067-F9D9-4443-A555-6497FA661F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98644067-F9D9-4443-A555-6497FA661F2D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F23E66B2-6FE2-47A6-83F7-91CE55B37880}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -31,6 +29,14 @@ Global
 		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36EA86C0-57BF-414D-903D-7FBBAC85665F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADA412F8-475C-4010-B7EB-B6897D2294FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADA412F8-475C-4010-B7EB-B6897D2294FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADA412F8-475C-4010-B7EB-B6897D2294FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADA412F8-475C-4010-B7EB-B6897D2294FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{836AA207-F21E-46B1-9871-A02A34AE2E7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{836AA207-F21E-46B1-9871-A02A34AE2E7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{836AA207-F21E-46B1-9871-A02A34AE2E7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{836AA207-F21E-46B1-9871-A02A34AE2E7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

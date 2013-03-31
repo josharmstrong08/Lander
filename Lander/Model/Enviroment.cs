@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace LanderSimulator
+namespace Lander.Model
 {
     public class Environment
     {
