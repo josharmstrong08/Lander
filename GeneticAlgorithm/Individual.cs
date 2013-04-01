@@ -15,8 +15,9 @@ namespace GeneticAlgorithm
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class Individual : IComparable<Individual>, ICloneable
+    public class IndividualOld : IComparable<IndividualOld>, ICloneable
     {
+
         public enum CrossoverType
         {
             Cycle,
@@ -29,7 +30,7 @@ namespace GeneticAlgorithm
 
         private List<double> englishContactTable;
 
-        public Individual(Random generator, List<double> englishContactTable, double badContactPenalty)
+        public IndividualOld(Random generator, List<double> englishContactTable, double badContactPenalty)
         { 
             this.generator = generator;
             this.englishContactTable = englishContactTable;

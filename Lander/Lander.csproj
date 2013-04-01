@@ -39,9 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LanderIndividualSettings.cs" />
     <Compile Include="Model\Enviroment.cs" />
     <Compile Include="Model\Lander.cs" />
-    <Compile Include="NeuralNetworkIndividual.cs" />
+    <Compile Include="LanderIndividual.cs" />
+    <Compile Include="LanderIndividualFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

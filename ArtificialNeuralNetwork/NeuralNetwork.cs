@@ -1,5 +1,6 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Storage;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -111,6 +112,76 @@ namespace ArtificialNeuralNetwork
                 weights.Add(new DenseMatrix(weights[weights.Count - 1].ColumnCount, nodecount));
             }
             this.outputweights = new DenseMatrix(this.weights[this.weights.Count - 1].ColumnCount, this.OutputCount);
+        }
+
+        /// <summary>
+        /// Returns a list of all the weights in the network. Generally these values should modified
+        /// and then passed back to <see cref="SetAllWeights"/>. 
+        /// </summary>
+        /// <returns>A list containing all the weights in the network.</returns>
+        public List<double> GetAllWeights()
+        {
+            List<double> weights = new List<double>();
+
+            foreach (var weightMatrix in this.weights)
+            {
+                weights.AddRange(weightMatrix.ToColumnWiseArray());
+            }
+
+            weights.AddRange(this.outputweights.ToColumnWiseArray());
+
+            return weights;
+        }
+
+        /// <summary>
+        /// Sets the weights in the network. Generally the weights passed in should originate from
+        /// the weights return from <see cref="GetAllWeights"/>.
+        /// </summary>
+        /// <param name="newWeights"></param>
+        public void SetAllWeights(List<double> newWeights)
+        {
+            if (this.weights.Count == 0)
+            {
+                // There are no hidden layers, just output weights.
+                if (newWeights.Count != this.InputCount * this.OutputCount)
+                {
+                    throw new ArgumentException("The number of weights passed in (" + newWeights.Count + 
+                        ") does not match the number of weights in the network (" + (this.InputCount * this.OutputCount) + ").");
+                }
+
+                this.outputweights = new DenseMatrix(this.InputCount, this.OutputCount, newWeights.ToArray());
+                //this.outputweights = new DenseMatrix(this.outputweights.RowCount, this.outputweights.ColumnCount, newWeights.ToArray());
+            }
+            else
+            {
+                int currentIndex = 0;
+                int rowCount = 0;
+                int colCount = 0;
+
+                // There are some hidden layers. 
+                if (this.weights.Count == 1)
+                {
+                    // Just one layer
+                    rowCount = this.InputCount;
+                    colCount = this.OutputCount;
+                    this.weights[0] = new DenseMatrix(rowCount, colCount, newWeights.GetRange(currentIndex, rowCount * colCount).ToArray());
+                    currentIndex += rowCount * colCount;
+                }
+                else
+                {
+                    // More than one layer
+                    this.weights[0] = new DenseMatrix(this.InputCount, this.weights[0])
+                    for (var i = 1; i < this.weights.Count; i++)
+                    {
+                        this.weights[0] = new DenseMatrix()
+                    }
+                }
+
+                // Now get the output weights
+                rowCount = this.weights[this.weights.Count - 1].ColumnCount;
+                colCount = this.OutputCount;
+                this.outputweights = new DenseMatrix(this.weights[this.weights.Count-1].ColumnCount, this.OutputCount, newWeights.GetRange(currentIndex, ))
+            }
         }
 
         /// <summary>

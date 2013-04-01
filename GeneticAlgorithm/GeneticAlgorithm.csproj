@@ -41,10 +41,9 @@
   <ItemGroup>
     <Compile Include="GeneticAlgorithm.cs" />
     <Compile Include="IIndividualFactory.cs" />
-    <Compile Include="Individual.cs" />
+    <Compile Include="IIndividualSettings.cs" />
     <Compile Include="IIndividual.cs" />
     <Compile Include="IterationEventArgs.cs" />
-    <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

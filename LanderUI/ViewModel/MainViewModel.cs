@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
 using System.Windows;
+using Lander;
 
 namespace LanderUI.ViewModel
 {
@@ -71,7 +72,11 @@ namespace LanderUI.ViewModel
             this.neuralNetwork.OutputCount = 2;
             this.neuralNetwork.AddHiddenLayer(8);
 
-            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm();
+            LanderIndividualSettings landerIndividualSettings = new LanderIndividualSettings();
+            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.Cycle;
+            LanderIndividualFactory landerFactory = new LanderIndividualFactory();
+            landerFactory.IndividualSettings = landerIndividualSettings;
+            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm(landerFactory);
         }
 
         /// <summary>

@@ -22,11 +22,18 @@ namespace GeneticAlgorithm
         private Random randomGenerator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GeneticAlgorithm"/> class. 
+        /// The factory that produces individuals. 
         /// </summary>
-        public GeneticAlgorithm()
+        private IIndividualFactory individualFactory;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GeneticAlgorithm"/> class.
+        /// </summary>
+        /// <param name="individualFactory">The individual settings to use during this run.</param>
+        public GeneticAlgorithm(IIndividualFactory individualFactory)
         {
             this.randomGenerator = new Random();
+            this.individualFactory = individualFactory;
         }
 
         /// <summary>
@@ -36,7 +43,7 @@ namespace GeneticAlgorithm
         public event EventHandler<IterationEventArgs> IterationEvent;
 
         /// <summary>
-        /// Available selection algorithms
+        /// Available selection algorithms.
         /// </summary>
         public enum SelectionTypes
         {
@@ -86,7 +93,7 @@ namespace GeneticAlgorithm
         /// <summary>
         /// Gets or sets the crossover algorithm to use during crossover.
         /// </summary>
-        public Individual.CrossoverType CrossoverType { get; set; }
+        public string CrossoverType { get; set; }
 
         /// <summary>
         /// Gets or sets the selection algorithm to use during selection.
@@ -96,94 +103,114 @@ namespace GeneticAlgorithm
         /// <summary>
         /// Runs the genetic algorithm with the current settings. Blocks until the search is done. 
         /// </summary>
+        /// <param name="settings">The individual settings to use during this run.</param>
         /// <returns>The best individual.</returns>
-        public Individual Run()
+        public IIndividual Run(IIndividualSettings settings)
         {
-            List<Individual> currentpopulation = new List<Individual>();
-            List<Individual> newpopulation = new List<Individual>();
+            List<IIndividual> currentPopulation = new List<IIndividual>();
+            List<IIndividual> newPopulation = new List<IIndividual>();
             List<TimeSpan> times = new List<TimeSpan>();
-            Stopwatch timer = new Stopwatch();
-            Stopwatch timer2 = new Stopwatch();
+            Stopwatch timerFitness = new Stopwatch();
+            Stopwatch timerTotal = new Stopwatch();
 
-            timer2.Start();
+            // Give the individual factory the settings to use.
+            // This might have to be a copy so the settings can be changed mid-run.
+            this.individualFactory.IndividualSettings = settings;
+
+            // Start timing
+            timerTotal.Start();
+
+            // Create the initial population.
             for (int i = 0; i < this.PopulationSize; i++)
             {
-                
-                //currentpopulation.Add(new Individual(this.randomGenerator, contacttable, this.BadContactPenalty));
-                //currentpopulation[i].CalculateFitness(cleartext);
+                currentPopulation.Add(this.individualFactory.CreateIndividual());
+                currentPopulation[i].CalculateFitness();
             }
             
+            // Start doing the search. 
             int calculations = 0;
             while (calculations < this.CalculationLimit)
             {
-                currentpopulation.Sort();
-                this.RaiseIterationEvent(new IterationEventArgs(
-                    currentpopulation[0].Fitness,
-                    currentpopulation[currentpopulation.Count - 1].Fitness,
-                    (from item in currentpopulation select item.Fitness).Average()));
+                // Sort the population by fitness so that we can do elitism.
+                currentPopulation.Sort();
 
+                // Raise an iteration event with current statistical info.
+                this.RaiseIterationEvent(new IterationEventArgs(
+                    currentPopulation[0].Fitness,
+                    currentPopulation[currentPopulation.Count - 1].Fitness,
+                    (from item in currentPopulation select item.Fitness).Average()));
+
+                // Elitism: Copy a certain number of the very best individuals to the new population.
                 for (int i = 0; i < this.ElitistCount; i++)
                 {
-                    newpopulation.Add(currentpopulation[i]);
+                    newPopulation.Add(currentPopulation[i]);
                 }
 
+                // For the rest of the population, use crossover and mutation to create new children.
                 for (int i = this.ElitistCount; i < this.PopulationSize; i++)
                 {
-                    // select
-                    List<Individual> parents = null;
+                    // Selection: Select two parents based on the specifed selection algorithm
+                    List<IIndividual> parents = null;
                     switch (this.SelectionType)
                     {
                         case SelectionTypes.Tournament:
-                            parents = this.TournamentSelection(currentpopulation);
+                            parents = this.TournamentSelection(currentPopulation);
                             break;
                         case SelectionTypes.RouletteWheel:
-                            parents = this.RouletteWheelSelection(currentpopulation);
+                            parents = this.RouletteWheelSelection(currentPopulation);
                             break;
                     }
                     
-                    // crossover
-                    Individual child;
+                    // Crossover: For a certain probability create a new child by crossing 
+                    // over two individuals. Otherwise just copy the first parent chosen. 
+                    IIndividual child;
                     if (this.randomGenerator.NextDouble() < this.CrossoverProbability)
                     {
-                        child = parents[0].Crossover(parents[1], this.CrossoverType);
+                        child = parents[0].Crossover(parents[1]);
                     }
                     else
                     {
                         child = parents[0];
                     }
 
-                    // mutate
+                    // Mutation: For a certain probability call the individual's mutate function.
                     if (this.randomGenerator.NextDouble() < this.MutationProbability)
                     {
                         child.Mutate();
                     }
 
-                    timer.Reset();
-                    timer.Start();
-                    //child.CalculateFitness(cleartext);
-                    timer.Stop();
-                    times.Add(timer.Elapsed);
+                    // Now calculate the new child's fitness. 
+                    timerFitness.Restart();
+                    child.CalculateFitness();
+                    timerFitness.Stop();
+
+                    times.Add(timerFitness.Elapsed);
                     calculations++;
 
-                    // insert
-                    newpopulation.Add(child);
+                    // Insert the child into the new population.
+                    newPopulation.Add(child);
                 }
 
-                currentpopulation = new List<Individual>(newpopulation);
+                // Copy the new population into the current population.
+                // Note: List copies the reference of each item in this operation.
+                currentPopulation = new List<IIndividual>(newPopulation);
 
-                newpopulation.Clear();
+                // Now clear the population.
+                newPopulation.Clear();
             }
 
-            currentpopulation.Sort();
-            timer2.Stop();
-            Debug.WriteLine("Best individual: " + currentpopulation[0].Genotype + " at " + currentpopulation[0].Fitness + " fitness");
-            //Debug.WriteLine(currentpopulation[0].Decrypt(cleartext));
-            Debug.WriteLine("Total time: " + timer2.Elapsed);
+            // We've passed the maxium fitness calculation limit. Sort the resulting population.
+            currentPopulation.Sort();
+
+            timerTotal.Stop();
+            Debug.WriteLine("Best individual: " + currentPopulation[0] + " at " + currentPopulation[0].Fitness + " fitness");
+            Debug.WriteLine("Total time: " + timerTotal.Elapsed);
             Debug.WriteLine("Totale time spend evaluating fitnesses: " + (times.Sum((time) => time.TotalMilliseconds) / 1000));
             Debug.WriteLine("Average time evaluating fitness: " + (times.Average((time) => time.TotalMilliseconds) / 1000));
             Debug.WriteLine("Fitness evaluation count: " + calculations);
 
-            return currentpopulation[0];
+            // Return the best individual
+            return currentPopulation[0];
         }
 
         /// <summary>
@@ -205,15 +232,18 @@ namespace GeneticAlgorithm
         /// </summary>
         /// <param name="population">The population to select from.</param>
         /// <returns>A list of two selected parents.</returns>
-        private List<Individual> TournamentSelection(List<Individual> population)
+        private List<IIndividual> TournamentSelection(List<IIndividual> population)
         {
-            List<Individual> tournament = new List<Individual>();
+            List<IIndividual> tournament = new List<IIndividual>();
             for (int i = 0; i < this.TournamentSize; i++)
             {
                 int index = this.randomGenerator.Next(0, population.Count);
+
+                // If the index specifies one of the elitist individuals, then the individual
+                // must be cloned? Is this necessary? TODO
                 if (index < this.ElitistCount)
                 {
-                    tournament.Add((Individual)population[index].Clone());
+                    tournament.Add((IIndividual)population[index].Clone());
                 }
                 else
                 {
@@ -221,12 +251,14 @@ namespace GeneticAlgorithm
                 }
             }
 
+            // Remove the all but the two best individuals.
             tournament.Sort();
             for (int i = 0; i < this.TournamentSize - 2; i++)
             {
                 tournament.RemoveAt(tournament.Count - 1);
             }
 
+            // Return the list with the two best individuals. 
             return tournament;
         }
 
@@ -235,9 +267,9 @@ namespace GeneticAlgorithm
         /// </summary>
         /// <param name="population">The population to select from.</param>
         /// <returns>A list of two parent individuals.</returns>
-        private List<Individual> RouletteWheelSelection(List<Individual> population)
+        private List<IIndividual> RouletteWheelSelection(List<IIndividual> population)
         {
-            List<Individual> children = new List<Individual>();
+            List<IIndividual> children = new List<IIndividual>();
             double fitnesssum = 0;
             foreach (var guy in population)
             {
@@ -245,9 +277,9 @@ namespace GeneticAlgorithm
             }
 
             double rand = this.randomGenerator.NextDouble() * fitnesssum;
-            Individual guy1 = null;
+            IIndividual guy1 = null;
             double rand2 = this.randomGenerator.NextDouble() * fitnesssum;
-            Individual guy2 = null;
+            IIndividual guy2 = null;
             for (int i = 0; i < population.Count; i++)
             {
                 fitnesssum += population[i].Fitness;
@@ -255,7 +287,7 @@ namespace GeneticAlgorithm
                 {
                     if (i < this.ElitistCount)
                     {
-                        guy1 = (Individual)population[i].Clone();
+                        guy1 = (IIndividual)population[i].Clone();
                     }
                     else
                     {
@@ -272,7 +304,7 @@ namespace GeneticAlgorithm
                 {
                     if (i < this.ElitistCount)
                     {
-                        guy2 = (Individual)population[i].Clone();
+                        guy2 = (IIndividual)population[i].Clone();
                     }
                     else
                     {
