@@ -13,6 +13,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
         
         <Menu Grid.ColumnSpan="3" Grid.Row="0" IsMainMenu="True">
@@ -32,7 +33,9 @@
         </ToolBarTray>
         <TextBlock Grid.Column="0" Grid.Row="2" Text="X" Grid.ColumnSpan="2" />
         <TextBlock Grid.Column="0" Grid.Row="3" Text="Y" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Status" Grid.ColumnSpan="2" />
         <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding LanderPositionX}" />
         <TextBox Grid.Column="2" Grid.Row="3" Text="{Binding LanderPositionY}" />
+        <TextBox Grid.Column="2" Grid.Row="4" Text="{Binding LanderStatus, Mode=OneWay}" IsReadOnly="True" />
     </Grid>
 </Window>

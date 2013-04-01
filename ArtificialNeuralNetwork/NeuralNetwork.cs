@@ -1,32 +1,84 @@
-﻿using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.LinearAlgebra.Storage;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NeuralNetwork.cs" company="Josh Armstrong">
+// TODO: Update copyright text.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace ArtificialNeuralNetwork
 {
+    using System;
+    using System.Collections.Generic;
+    using MathNet.Numerics;
+    using MathNet.Numerics.LinearAlgebra.Double;
+
+    /// <summary>
+    /// Provides functions to create and run a simply multi-layer artificial neural network.
+    /// Weights can be modified after initialization via the <see cref="GetAllWeights"/> and 
+    /// <see cref="SetAllWeights"/> functions. 
+    /// </summary>
     public class NeuralNetwork
     {
+        /// <summary>
+        /// Private backing field for the InputCount property.
+        /// </summary>
         private int inputCount;
 
+        /// <summary>
+        /// Private backing field for the OutputCount property.
+        /// </summary>
         private int outputCount;
 
+        /// <summary>
+        /// The output weight matrix.
+        /// </summary>
         private DenseMatrix outputweights;
 
+        /// <summary>
+        /// The list of hidden layer weight matrices.
+        /// </summary>
         private List<DenseMatrix> weights;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NeuralNetwork"/> class.
+        /// </summary>
         public NeuralNetwork()
         {
-            weights = new List<DenseMatrix>();
+            this.weights = new List<DenseMatrix>();
             this.InputCount = 1;
             this.OutputCount = 1;
         }
 
-        private double CalculateActivation(double input)
+        /// <summary>
+        /// Gets or sets the number of input nodes to the neural network.
+        /// </summary>
+        public int InputCount
         {
-            return 1 / (1 + Math.Pow(Constants.E, -input));
+            get { return this.inputCount; }
+            set { this.inputCount = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of output nodes to the neural network.
+        /// </summary>
+        public int OutputCount
+        {
+            get 
+            { 
+                return this.outputCount; 
+            }
+
+            set 
+            { 
+                this.outputCount = value;
+                if (this.weights.Count == 0)
+                {
+                    this.outputweights = new DenseMatrix(this.InputCount, value);
+                }
+                else
+                {
+                    this.outputweights = new DenseMatrix(this.weights[this.weights.Count - 1].ColumnCount, value);
+                }
+            }
         }
 
         /// <summary>
@@ -48,18 +100,18 @@ namespace ArtificialNeuralNetwork
                 current[0, i] = inputs[i];
             }
 
-            //Debug.WriteLine("Input: ");
-            //Debug.WriteLine(current.ToString());
+            ////Debug.WriteLine("Input: ");
+            ////Debug.WriteLine(current.ToString());
 
             foreach (var matrix in this.weights)
             {
-                //Debug.WriteLine("Hidden layer:");
-                //Debug.WriteLine(current.ToString());
-                //Debug.WriteLine("*");
-                //Debug.WriteLine(matrix.ToString());
-                //Debug.WriteLine("=");
+                ////Debug.WriteLine("Hidden layer:");
+                ////Debug.WriteLine(current.ToString());
+                ////Debug.WriteLine("*");
+                ////Debug.WriteLine(matrix.ToString());
+                ////Debug.WriteLine("=");
                 current = current * matrix;
-                //Debug.WriteLine(current.ToString());
+                ////Debug.WriteLine(current.ToString());
 
                 if (current.RowCount != 1)
                 {
@@ -75,42 +127,43 @@ namespace ArtificialNeuralNetwork
                 }
             }
 
-            
-            //Debug.WriteLine("Output layer:");
-            //Debug.WriteLine(current.ToString());
-            //Debug.WriteLine("*");
-            //Debug.WriteLine(this.outputweights.ToString());
-            //Debug.WriteLine("=");
+            ////Debug.WriteLine("Output layer:");
+            ////Debug.WriteLine(current.ToString());
+            ////Debug.WriteLine("*");
+            ////Debug.WriteLine(this.outputweights.ToString());
+            ////Debug.WriteLine("=");
             current = current * this.outputweights;
-            //Debug.WriteLine(current.ToString());
+            ////Debug.WriteLine(current.ToString());
 
             if (current.RowCount != 1)
-
             {
                 throw new Exception("Row count is != 1 (" + current.RowCount + ")");
             }
+
             List<double> output = new List<double>();
             for (var col = 0; col < current.ColumnCount; col++)
             {
                 output.Add(current[0, col]);
             }
+            
             return output;
         }
 
         /// <summary>
         /// Adds a new hidden layer right behind the output layer. 
         /// </summary>
-        /// <param name="nodecount"></param>
+        /// <param name="nodecount">The number of nodes in the hidden layer.</param>
         public void AddHiddenLayer(int nodecount)
         {
             if (this.weights.Count == 0)
             {
-                weights.Add(new DenseMatrix(this.inputCount, nodecount));
+                this.weights.Add(new DenseMatrix(this.inputCount, nodecount));
             }
             else
             {
-                weights.Add(new DenseMatrix(weights[weights.Count - 1].ColumnCount, nodecount));
+                this.weights.Add(new DenseMatrix(this.weights[this.weights.Count - 1].ColumnCount, nodecount));
             }
+
             this.outputweights = new DenseMatrix(this.weights[this.weights.Count - 1].ColumnCount, this.OutputCount);
         }
 
@@ -137,7 +190,7 @@ namespace ArtificialNeuralNetwork
         /// Sets the weights in the network. Generally the weights passed in should originate from
         /// the weights return from <see cref="GetAllWeights"/>.
         /// </summary>
-        /// <param name="newWeights"></param>
+        /// <param name="newWeights">The list of weights to set.</param>
         public void SetAllWeights(List<double> newWeights)
         {
             if (this.weights.Count == 0)
@@ -150,7 +203,7 @@ namespace ArtificialNeuralNetwork
                 }
 
                 this.outputweights = new DenseMatrix(this.InputCount, this.OutputCount, newWeights.ToArray());
-                //this.outputweights = new DenseMatrix(this.outputweights.RowCount, this.outputweights.ColumnCount, newWeights.ToArray());
+                ////this.outputweights = new DenseMatrix(this.outputweights.RowCount, this.outputweights.ColumnCount, newWeights.ToArray());
             }
             else
             {
@@ -170,17 +223,26 @@ namespace ArtificialNeuralNetwork
                 else
                 {
                     // More than one layer
-                    this.weights[0] = new DenseMatrix(this.InputCount, this.weights[0])
+                    // Do the first layer using the input count
+                    rowCount = this.InputCount; 
+                    colCount = this.weights[0].ColumnCount;
+                    this.weights[0] = new DenseMatrix(rowCount, colCount, newWeights.GetRange(currentIndex, rowCount * colCount).ToArray());
+                    currentIndex += rowCount * colCount;
+
+                    // Now do the layers after the first layer
                     for (var i = 1; i < this.weights.Count; i++)
                     {
-                        this.weights[0] = new DenseMatrix()
+                        rowCount = this.weights[i].RowCount;
+                        colCount = this.weights[i].ColumnCount;
+                        this.weights[i] = new DenseMatrix(rowCount, colCount, newWeights.GetRange(currentIndex, rowCount * colCount).ToArray());
+                        currentIndex += rowCount * colCount;
                     }
                 }
 
                 // Now get the output weights
                 rowCount = this.weights[this.weights.Count - 1].ColumnCount;
                 colCount = this.OutputCount;
-                this.outputweights = new DenseMatrix(this.weights[this.weights.Count-1].ColumnCount, this.OutputCount, newWeights.GetRange(currentIndex, ))
+                this.outputweights = new DenseMatrix(rowCount, colCount, newWeights.GetRange(currentIndex, rowCount * colCount).ToArray());
             }
         }
 
@@ -189,41 +251,18 @@ namespace ArtificialNeuralNetwork
         /// </summary>
         public void ClearHiddenAllLayers()
         {
-            weights.Clear();
-            weights.Add(new DenseMatrix(1));
+            this.weights.Clear();
+            this.weights.Add(new DenseMatrix(1));
         }
 
         /// <summary>
-        /// Gets or sets the number of input nodes to the neural network.
+        /// Sigmoid activation function for a node.
         /// </summary>
-        public int InputCount
+        /// <param name="input">The summed and weighted input to the node.</param>
+        /// <returns>The output of a node.</returns>
+        private double CalculateActivation(double input)
         {
-            get { return inputCount; }
-            set { this.inputCount = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of output nodes to the neural network.
-        /// </summary>
-        public int OutputCount
-        {
-            get 
-            { 
-                return outputCount; 
-            }
-
-            set 
-            { 
-                outputCount = value;
-                if (this.weights.Count == 0)
-                {
-                    this.outputweights = new DenseMatrix(this.InputCount, value);
-                }
-                else
-                {
-                    this.outputweights = new DenseMatrix(this.weights[this.weights.Count - 1].ColumnCount, value);
-                }
-            }
+            return 1 / (1 + Math.Pow(Constants.E, -input));
         }
     }
 }

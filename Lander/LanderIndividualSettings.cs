@@ -20,14 +20,19 @@ namespace Lander
         public enum CrossoverType
         {
             /// <summary>
-            /// Cycle crossover
+            /// One-point crossover
             /// </summary>
-            Cycle,
+            OnePoint,
 
             /// <summary>
-            /// PMX crossover
+            /// Two-point crossover
             /// </summary>
-            PMX
+            TwoPoint,
+
+            /// <summary>
+            /// Uniform crossover
+            /// </summary>
+            Uniform
         }
 
         /// <summary>
@@ -39,5 +44,20 @@ namespace Lander
         /// Gets or sets the environment to test the lander
         /// </summary>
         public Environment LanderEnvironment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the amount of starting fuel
+        /// </summary>
+        public double StartingFuel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the starting Y position.
+        /// </summary>
+        public double StartingHeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the starting X position.
+        /// </summary>
+        public double StartingHorizontal { get; set; }
     }
 }
