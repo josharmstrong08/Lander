@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.Timers;
 using System.Windows;
 using Lander;
+using System.ComponentModel;
+using System;
+using System.Collections.ObjectModel;
 
 namespace LanderUI.ViewModel
 {
@@ -35,7 +38,17 @@ namespace LanderUI.ViewModel
         /// </summary>
         public const string LanderPositionYPropertyName = "LanderPositionY";
 
+        /// <summary>
+        /// The <see cref="LanderStatus" /> property's name.
+        /// </summary>
         public const string LanderStatusPropertyName = "LanderStatus";
+
+        /// <summary>
+        /// The <see cref="IsTraining" /> property's name.
+        /// </summary>
+        public const string IsTrainingPropertyName = "IsTraining";
+
+        private bool isTraining = false;
 
         private Lander.Model.Environment environment;
 
@@ -53,6 +66,8 @@ namespace LanderUI.ViewModel
 
         private RelayCommand stopCommand;
 
+        private RelayCommand trainCommand;
+
         private NeuralNetwork neuralNetwork;
 
         private string landerStatus;
@@ -62,46 +77,19 @@ namespace LanderUI.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            this.environment = new Environment();
+            this.environment = new Lander.Model.Environment();
             this.lander = new Lander.Model.Lander(this.environment, 100, 0, 100);
             timer = new Timer(10);
             timer.Elapsed += new ElapsedEventHandler(UpdateLanderPosition);
             timer.AutoReset = true;
             this.LanderPositionX = this.lander.PositionX;
             this.LanderPositionY = this.lander.PositionY;
-            /*
-            this.neuralNetwork = new NeuralNetwork();
-            // Set up the network for it's seven inputs and two outputs. 
-            this.neuralNetwork.InputCount = 7;
-            this.neuralNetwork.OutputCount = 2;
-            this.neuralNetwork.AddHiddenLayer(8);
-            this.neuralNetwork.AddHiddenLayer(8);
-            List<double> weights = this.neuralNetwork.GetAllWeights();
-            this.neuralNetwork.SetAllWeights(weights);
-            */
 
-            LanderIndividualSettings landerIndividualSettings = new LanderIndividualSettings();
-            LanderIndividualFactory landerFactory = new LanderIndividualFactory();
-            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm(landerFactory);
+            this.MinFitnessValues = new ObservableCollection<Tuple<int, double>>();
+            this.MaxFitnessValues = new ObservableCollection<Tuple<int, double>>();
+            this.AvgFitnessValues = new ObservableCollection<Tuple<int, double>>();
 
-            this.environment.Gravity = 2.0;
-            this.environment.WindSpeed = 0.1;
-            landerIndividualSettings.StartingFuel = 100;
-            landerIndividualSettings.StartingHeight = 100;
-            landerIndividualSettings.StartingHorizontal = 0;
-            landerIndividualSettings.LanderEnvironment = this.environment;
-            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.OnePoint;
-            ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
-            ga.TournamentSize = 3;
-            ga.CrossoverProbability = 1;
-            ga.MutationProbability = 1;
-            ga.CalculationLimit = 10000;
-            ga.ElitistCount = 10;
-            ga.PopulationSize = 100;
-            landerFactory.IndividualSettings = landerIndividualSettings;
-
-            LanderIndividual best = (LanderIndividual)ga.Run(landerIndividualSettings);
-            this.neuralNetwork = best.CurrentNeuralNetwork;
+            this.ExecuteTrainCommand();
         }
 
         /// <summary>
@@ -113,24 +101,22 @@ namespace LanderUI.ViewModel
         }
 
         /// <summary>
-        /// Starts simulation
+        /// Start the simulation
         /// </summary>
         private void ExecutePlayCommand()
         {
-            this.lander.Reset();
-            this.timer.Start();
-            this.LanderPositionX = this.lander.PositionX;
-            this.LanderPositionY = this.lander.PositionY;
-            //List<double> inputs = new List<double>();
-            //inputs.Add(1);
-            //inputs.Add(2);
-            //IList<double> output = neuralNetwork.Run(inputs);
-            //foreach (var num in output)
-            //{
-            //    Debug.WriteLine(num);
-            //}
+            if (this.IsTraining == false)
+            {
+                this.lander.Reset();
+                this.timer.Start();
+                this.LanderPositionX = this.lander.PositionX;
+                this.LanderPositionY = this.lander.PositionY;
+            }
         }
 
+        /// <summary>
+        /// Stop the simulation
+        /// </summary>
         private void ExecuteStopCommand()
         {
             this.lander.Reset();
@@ -140,10 +126,98 @@ namespace LanderUI.ViewModel
         }
 
         /// <summary>
+        /// Run the genetic algorithm to train the neural network
+        /// </summary>
+        private void ExecuteTrainCommand()
+        {
+            this.ExecuteStopCommand();
+
+            // The background worker allows the GA to be run in a different thread
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+
+            // Setup of the genetic algorithm
+            LanderIndividualSettings landerIndividualSettings = new LanderIndividualSettings();
+            LanderIndividualFactory landerFactory = new LanderIndividualFactory();
+            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm(landerFactory);
+            LanderIndividual best = null;
+            int currentIteration = 0;
+
+            // Set up the ga
+            this.environment.Gravity = 2.0;
+            this.environment.WindSpeed = 0.1;
+            landerIndividualSettings.StartingFuel = 100;
+            landerIndividualSettings.StartingHeight = 100;
+            landerIndividualSettings.StartingHorizontal = 0;
+            landerIndividualSettings.LanderEnvironment = this.environment;
+            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.OnePoint;
+            ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
+            ga.TournamentSize = 3;
+            ga.CrossoverProbability = 1;
+            ga.MutationProbability = 1;
+            ga.CalculationLimit = 30000;
+            ga.ElitistCount = 10;
+            ga.PopulationSize = 100;
+            landerFactory.IndividualSettings = landerIndividualSettings;
+
+            // This lambda function handles the iteration events from the ga.
+            EventHandler<IterationEventArgs> handler = (sender, args) =>
+            {
+                backgroundWorker.ReportProgress(0, args);
+            };
+
+            // Set the work lambda function. 
+            backgroundWorker.DoWork += (sender, e) =>
+            {
+
+                
+                // Add the iteration event handler to report progress back to the main thread
+                ga.IterationEvent += handler;
+
+                // Run the ga
+                best = (LanderIndividual)ga.Run(landerIndividualSettings);
+
+                // Save the resulting neural network
+                this.neuralNetwork = best.CurrentNeuralNetwork;
+
+                ga.IterationEvent -= handler;
+
+            };
+
+            // Update the graph to show progress
+            backgroundWorker.ProgressChanged += (sender, e) =>
+            {
+                this.MinFitnessValues.Add(new Tuple<int, double>(currentIteration, ((IterationEventArgs)e.UserState).MinFitness));
+                this.MaxFitnessValues.Add(new Tuple<int, double>(currentIteration, ((IterationEventArgs)e.UserState).MaxFitness));
+                this.AvgFitnessValues.Add(new Tuple<int, double>(currentIteration, ((IterationEventArgs)e.UserState).AverageFitness));
+                currentIteration++;
+
+                if (this.MinFitnessValues.Count > 600)
+                {
+                    this.MinFitnessValues.Clear();
+                    this.MaxFitnessValues.Clear();
+                    this.AvgFitnessValues.Clear();
+                }
+            };
+
+            backgroundWorker.RunWorkerCompleted += (sender, e) =>
+            {
+                this.IsTraining = false;
+            };
+            
+            // Clear out previous chart data and run the background worker
+            this.MinFitnessValues.Clear();
+            this.MaxFitnessValues.Clear();
+            this.AvgFitnessValues.Clear();
+            backgroundWorker.WorkerReportsProgress = true;
+            this.IsTraining = true;
+            backgroundWorker.RunWorkerAsync();
+        }
+
+        /// <summary>
         /// Handles the elapsed event of the timer. 
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="args"></param>
+        /// <param name="source">The source of elapsed event</param>
+        /// <param name="args">The elapsed event arguments</param>
         public void UpdateLanderPosition(object source, ElapsedEventArgs args)
         {
             // First query the neural net to see how it reacts to the current conditions. 
@@ -209,6 +283,17 @@ namespace LanderUI.ViewModel
         }
 
         /// <summary>
+        /// Gets the TrainCommand
+        /// </summary>
+        public RelayCommand TrainCommand
+        {
+            get
+            {
+                return this.trainCommand ?? (this.trainCommand = new RelayCommand(ExecuteTrainCommand));
+            }
+        }
+
+        /// <summary>
         /// Sets and gets the LanderPositionX property.
         /// Changes to that property's value raise the PropertyChanged event. 
         /// </summary>
@@ -231,7 +316,6 @@ namespace LanderUI.ViewModel
                 RaisePropertyChanged(MainViewModel.LanderPositionXPropertyName);
             }
         }
-
 
         /// <summary>
         /// Sets and gets the LanderPositionY property.
@@ -257,6 +341,9 @@ namespace LanderUI.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets a string version of the lander's status
+        /// </summary>
         public string LanderStatus
         {
             get
@@ -274,5 +361,45 @@ namespace LanderUI.ViewModel
                 }
             }
         }
+
+
+        /// <summary>
+        /// Sets and gets the IsTraining property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public bool IsTraining
+        {
+            get
+            {
+                return isTraining;
+            }
+
+            set
+            {
+                if (isTraining == value)
+                {
+                    return;
+                }
+
+                RaisePropertyChanging(IsTrainingPropertyName);
+                isTraining = value;
+                RaisePropertyChanged(IsTrainingPropertyName);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the collection of minimum fitness values reported for each generation
+        /// </summary>
+        public ObservableCollection<Tuple<int, double>> MinFitnessValues { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of maximum fitness values reported for each generation
+        /// </summary>
+        public ObservableCollection<Tuple<int, double>> MaxFitnessValues { get; set; }
+
+        /// <summary>
+        /// Gets or sets the average fitness value reported for each generation.
+        /// </summary>
+        public ObservableCollection<Tuple<int, double>> AvgFitnessValues { get; set; }
     }
 }
