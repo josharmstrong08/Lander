@@ -20,12 +20,17 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="20" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
@@ -54,14 +59,22 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <TextBlock Grid.Column="0" Grid.Row="2" Text="X" Grid.ColumnSpan="2" />
-        <TextBlock Grid.Column="0" Grid.Row="3" Text="Y" Grid.ColumnSpan="2" />
-        <TextBlock Grid.Column="0" Grid.Row="4" Text="Status" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="Position X" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Position Y" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Velocity X" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="5" Text="Velocity Y" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="6" Text="Status" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="7" Text="Burn" Grid.ColumnSpan="2" />
+        <TextBlock Grid.Column="0" Grid.Row="8" Text="Thrust" Grid.ColumnSpan="2" />
         <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding LanderPositionX}" />
         <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding LanderPositionY}" />
-        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding LanderStatus, Mode=OneWay}" IsReadOnly="True" />
+        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding LanderVelocityX}" />
+        <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding LanderVelocityY}" />
+        <TextBox Grid.Column="1" Grid.Row="6" Text="{Binding LanderStatus, Mode=OneWay}" IsReadOnly="True" />
+        <TextBox Grid.Column="1" Grid.Row="7" Text="{Binding LanderBurn, Mode=OneWay}" IsReadOnly="True" />
+        <TextBox Grid.Column="1" Grid.Row="8" Text="{Binding LanderThrust, Mode=OneWay}" IsReadOnly="True" />
 
-        <chartingToolkit:Chart Grid.Row="2" Grid.RowSpan="4" Grid.Column="2">
+        <chartingToolkit:Chart Grid.Row="2" Grid.RowSpan="8" Grid.Column="3">
             <chartingToolkit:Chart.Series>
                 <chartingToolkit:LineSeries ItemsSource="{Binding MinFitnessValues}"
                                         IndependentValuePath="Item1" DependentValuePath="Item2"

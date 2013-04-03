@@ -144,6 +144,7 @@ namespace ArtificialNeuralNetwork
             for (var col = 0; col < current.ColumnCount; col++)
             {
                 output.Add(current[0, col]);
+                //output.Add(this.CalculateActivation(current[0, col]));
             }
             
             return output;
@@ -263,6 +264,25 @@ namespace ArtificialNeuralNetwork
         private double CalculateActivation(double input)
         {
             return 1 / (1 + Math.Pow(Constants.E, -input));
+        }
+
+        /// <summary>
+        /// Returns a string representation of the neural network by printing out
+        /// each matrix in order.
+        /// </summary>
+        /// <returns>A string representation of the network.</returns>
+        public override string ToString()
+        {
+            string output = "";
+
+            foreach (var matrix in this.weights)
+            {
+
+                output += matrix.ToString("f1") + "\n\n";
+            }
+
+            output += this.outputweights.ToString("f1") + "\n";
+            return output;
         }
     }
 }

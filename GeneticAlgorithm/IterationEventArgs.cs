@@ -23,14 +23,23 @@ namespace GeneticAlgorithm
         /// <param name="minFitness">The minimum fitness seen.</param>
         /// <param name="maxFitness">The maximum fitness seen.</param>
         /// <param name="averageFitness">The average fitness seen.</param>
+        /// <param name="minDifference">The minimum genotype difference seen.</param>
+        /// <param name="maxDifference">The maximum genotype difference seen.</param>
+        /// <param name="averageDifference">The average genotype difference seen.</param>
         public IterationEventArgs(
             double minFitness,
             double maxFitness,
-            double averageFitness)
+            double averageFitness,
+            double minDifference,
+            double maxDifference,
+            double averageDifference)
         {
             this.MinFitness = minFitness;
             this.MaxFitness = maxFitness;
             this.AverageFitness = averageFitness;
+            this.MinDifference = minDifference;
+            this.MaxDifference = maxDifference;
+            this.AverageDifference = averageDifference;
         }
 
         /// <summary>
@@ -47,5 +56,20 @@ namespace GeneticAlgorithm
         /// Gets or sets the average fitness.
         /// </summary>
         public double AverageFitness { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum genotype difference.
+        /// </summary>
+        public double MaxDifference { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum genotype difference.
+        /// </summary>
+        public double MinDifference { get; set; }
+
+        /// <summary>
+        /// Gets or sets the average genotype difference.
+        /// </summary>
+        public double AverageDifference { get; set; }
     }
 }

@@ -48,6 +48,34 @@ namespace LanderUI.ViewModel
         /// </summary>
         public const string IsTrainingPropertyName = "IsTraining";
 
+        /// <summary>
+        /// The <see cref="LanderBurn" /> property's name.
+        /// </summary>
+        public const string LanderBurnPropertyName = "LanderBurn";
+
+        /// <summary>
+        /// The <see cref="LanderBurn" /> property's name.
+        /// </summary>
+        public const string LanderThrustPropertyName = "LanderThrust";
+
+        /// <summary>
+        /// The <see cref="LanderVelocityY" /> property's name.
+        /// </summary>
+        public const string LanderVelocityYPropertyName = "LanderVelocityY";
+
+        /// <summary>
+        /// The <see cref="LanderVelocityX" /> property's name.
+        /// </summary>
+        public const string LanderVelocityXPropertyName = "LanderVelocityX";
+
+        private double landerVelocityX = 0;
+
+        private double landerVelocityY = 0;
+
+        private double landerBurn = 0;
+
+        private double landerThrust = 0;
+
         private bool isTraining = false;
 
         private Lander.Model.Environment environment;
@@ -151,11 +179,11 @@ namespace LanderUI.ViewModel
             landerIndividualSettings.LanderEnvironment = this.environment;
             landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.OnePoint;
             ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
-            ga.TournamentSize = 3;
-            ga.CrossoverProbability = 1;
+            ga.TournamentSize = 4;
+            ga.CrossoverProbability = 0;
             ga.MutationProbability = 1;
-            ga.CalculationLimit = 30000;
-            ga.ElitistCount = 10;
+            ga.CalculationLimit = 60000;
+            ga.ElitistCount = 4;
             ga.PopulationSize = 100;
             landerFactory.IndividualSettings = landerIndividualSettings;
 
@@ -176,8 +204,6 @@ namespace LanderUI.ViewModel
                 // Run the ga
                 best = (LanderIndividual)ga.Run(landerIndividualSettings);
 
-                // Save the resulting neural network
-                this.neuralNetwork = best.CurrentNeuralNetwork;
 
                 ga.IterationEvent -= handler;
 
@@ -202,6 +228,9 @@ namespace LanderUI.ViewModel
             backgroundWorker.RunWorkerCompleted += (sender, e) =>
             {
                 this.IsTraining = false;
+                // Save the resulting neural network
+                this.neuralNetwork = best.CurrentNeuralNetwork;
+                Debug.WriteLine(this.neuralNetwork.ToString());
             };
             
             // Clear out previous chart data and run the background worker
@@ -236,6 +265,10 @@ namespace LanderUI.ViewModel
             this.lander.Burn = output[0];
             this.lander.Thrust = output[1];
 
+            this.LanderBurn = this.lander.Burn;
+            this.LanderThrust = this.lander.Thrust;
+            this.LanderVelocityX = this.lander.VelocityX;
+            this.LanderVelocityY = this.lander.VelocityY;
             RaisePropertyChanging(LanderStatusPropertyName);
             this.lander.Update();
             this.LanderPositionX = this.lander.PositionX;
@@ -362,7 +395,6 @@ namespace LanderUI.ViewModel
             }
         }
 
-
         /// <summary>
         /// Sets and gets the IsTraining property.
         /// Changes to that property's value raise the PropertyChanged event. 
@@ -401,5 +433,102 @@ namespace LanderUI.ViewModel
         /// Gets or sets the average fitness value reported for each generation.
         /// </summary>
         public ObservableCollection<Tuple<int, double>> AvgFitnessValues { get; set; }
+
+        /// <summary>
+        /// Sets and gets the LanderBurn property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public double LanderBurn
+        {
+            get
+            {
+                return landerBurn;
+            }
+
+            set
+            {
+                if (landerBurn == value)
+                {
+                    return;
+                }
+
+                RaisePropertyChanging(LanderBurnPropertyName);
+                landerBurn = value;
+                RaisePropertyChanged(LanderBurnPropertyName);
+            }
+        }
+
+        /// <summary>
+        /// Sets and gets the LanderThrust property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public double LanderThrust
+        {
+            get
+            {
+                return landerThrust;
+            }
+
+            set
+            {
+                if (landerThrust == value)
+                {
+                    return;
+                }
+
+                RaisePropertyChanging(LanderThrustPropertyName);
+                landerThrust = value;
+                RaisePropertyChanged(LanderThrustPropertyName);
+            }
+        }
+
+
+        /// <summary>
+        /// Sets and gets the LanderVelocityX property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public double LanderVelocityX
+        {
+            get
+            {
+                return landerVelocityX;
+            }
+
+            set
+            {
+                if (landerVelocityX == value)
+                {
+                    return;
+                }
+
+                RaisePropertyChanging(LanderVelocityXPropertyName);
+                landerVelocityX = value;
+                RaisePropertyChanged(LanderVelocityXPropertyName);
+            }
+        }
+
+        /// <summary>
+        /// Sets and gets the LanderVelocityY property.
+        /// Changes to that property's value raise the PropertyChanged event. 
+        /// </summary>
+        public double LanderVelocityY
+        {
+            get
+            {
+                return landerVelocityY;
+            }
+
+            set
+            {
+                if (landerVelocityY == value)
+                {
+                    return;
+                }
+
+                RaisePropertyChanging(LanderVelocityYPropertyName);
+                landerVelocityY = value;
+                RaisePropertyChanged(LanderVelocityYPropertyName);
+            }
+        }
     }
 }

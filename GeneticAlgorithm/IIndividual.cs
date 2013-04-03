@@ -44,5 +44,12 @@ namespace GeneticAlgorithm
         /// Calculates the fitness and updates the Fitness property.
         /// </summary>
         void CalculateFitness();
+
+        /// <summary>
+        /// Calculate the difference between two genotypes.
+        /// </summary>
+        /// <param name="other">The individual to compare to</param>
+        /// <returns>A number representing the difference. Higher numbers mean more different.</returns>
+        double CompareGenotype(IIndividual other);
     }
 }

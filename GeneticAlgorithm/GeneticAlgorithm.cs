@@ -134,11 +134,30 @@ namespace GeneticAlgorithm
                 // Sort the population by fitness so that we can do elitism.
                 currentPopulation.Sort();
 
+                // Calculate the genotype differences
+                double differenceTotal = 0;
+                double minDifference = double.MaxValue;
+                double maxDifference = double.MinValue;
+                for (int i = 0; i < currentPopulation.Count / 100; i++ )
+                {
+                    foreach (var individual2 in currentPopulation)
+                    {
+                        double difference = currentPopulation[i].CompareGenotype(individual2);
+                        differenceTotal += difference;
+                        if (difference < minDifference) minDifference = difference;
+                        if (difference > maxDifference) maxDifference = difference;
+                    }
+                }
+                double averageDifference = differenceTotal / (currentPopulation.Count * currentPopulation.Count);
+
                 // Raise an iteration event with current statistical info.
                 this.RaiseIterationEvent(new IterationEventArgs(
                     currentPopulation[0].Fitness,
                     currentPopulation[currentPopulation.Count - 1].Fitness,
-                    (from item in currentPopulation select item.Fitness).Average()));
+                    (from item in currentPopulation select item.Fitness).Average(),
+                    minDifference,
+                    maxDifference,
+                    averageDifference));
 
                 // Elitism: Copy a certain number of the very best individuals to the new population.
                 for (int i = 0; i < this.ElitistCount; i++)
@@ -240,7 +259,7 @@ namespace GeneticAlgorithm
                 int index = this.randomGenerator.Next(0, population.Count);
 
                 // If the index specifies one of the elitist individuals, then the individual
-                // must be cloned? Is this necessary? TODO
+                // must be cloned otherwise 
                 if (index < this.ElitistCount)
                 {
                     tournament.Add((IIndividual)population[index].Clone());

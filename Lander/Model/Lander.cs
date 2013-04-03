@@ -69,7 +69,7 @@ namespace Lander.Model
             this.CurrentTime = 0;
             this.VelocityX = 0;
             this.VelocityY = 0;
-            this.MaxLandingVelocity = 4.0;
+            this.MaxLandingVelocity = -4.0;
             this.MinSafeX = -0.2;
             this.MaxSafeX = 0.2;
             this.Enviroment = environment;
@@ -85,19 +85,35 @@ namespace Lander.Model
         public LanderStatus Update()
         {
             this.CurrentTime++;
-            this.VelocityY += this.Enviroment.Gravity;
+            this.VelocityY -= this.Enviroment.Gravity;
 
             // Adjust velocity for burn
-            this.VelocityY -= (this.Fuel - this.Burn >= 0 ? this.Burn : this.Burn - this.Fuel);
+            //this.VelocityY += (this.Fuel - this.Burn >= 0 ? this.Burn : this.Burn - this.Fuel);
+            if (this.Burn > this.Fuel)
+            {
+                this.VelocityY += this.Fuel;
+            }
+            else
+            {
+                this.VelocityY += this.Burn;
+            }
             this.Fuel = Math.Max(this.Fuel - this.Burn, 0);
 
             // Adjust velocity for thrust
-            this.VelocityX -= (this.Fuel - this.Thrust >= 0 ? this.Thrust : this.Thrust - this.Fuel);
-            this.Fuel = Math.Max(this.Fuel - this.Thrust, 0);
+            //this.VelocityX += (this.Fuel - this.Thrust >= 0 ? this.Thrust : this.Thrust - this.Fuel);
+            if (Math.Abs(this.Thrust) > this.Fuel)
+            {
+                this.VelocityX += (Math.Abs(this.Thrust) - this.Fuel) * (this.Thrust / Math.Abs(this.Thrust));
+            }
+            else
+            {
+                this.VelocityX += Math.Abs(this.Thrust) * (this.Thrust / Math.Abs(this.Thrust));
+            }
+            this.Fuel = Math.Max(this.Fuel - Math.Abs(this.Thrust), 0);
 
             // New position based on velocity
             this.PositionX += this.VelocityX + this.Enviroment.WindSpeed;
-            this.PositionY -= this.VelocityY;
+            this.PositionY += this.VelocityY;
 
             // Check if crashed
             if (this.PositionY > this.Enviroment.GetElevation(this.PositionX))
@@ -134,7 +150,8 @@ namespace Lander.Model
         /// <returns>The fitness of the lander</returns>
         public double CalculateFitness()
         {
-            double fitness = Math.Min(0, this.VelocityY - this.MaxLandingVelocity);
+            //double fitness = Math.Min(0, this.VelocityY - this.MaxLandingVelocity);
+            double fitness = this.MaxLandingVelocity - this.velocityY;
 
             if (this.PositionX < this.MinSafeX)
             {
@@ -186,6 +203,10 @@ namespace Lander.Model
                 if (burn >= 0)
                 {
                     burn = value;
+                }
+                else if (double.IsNaN(value) == true)
+                {
+                    throw new Exception("Invalid burn value");
                 }
                 else
                 {

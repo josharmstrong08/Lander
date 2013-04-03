@@ -28,33 +28,30 @@ namespace Lander
         private NeuralNetwork neuralNet;
 
         /// <summary>
-        /// Random number generator
-        /// TODO change to singleton?
-        /// </summary>
-        private Random random;
-
-        /// <summary>
         /// Private backing field the Settings property
         /// </summary>
         private LanderIndividualSettings settings;
 
+        private const int weightMin = -10;
+
+        private const int weightMax = 10;
+
         /// <summary>
-        /// Initialize a new <see cref="LanderIndividual"/> instance with random values.
+        /// Initialize a new <see cref="LanderIndividual"/> instance with Random values.
         /// </summary>
-        public LanderIndividual()
+        public LanderIndividual(Random random)
         {
             this.neuralNet = new NeuralNetwork();
             this.neuralNet.InputCount = 7;
             this.neuralNet.OutputCount = 2;
-            this.neuralNet.AddHiddenLayer(8);
-            this.neuralNet.AddHiddenLayer(8);
-            random = new Random();
+            this.neuralNet.AddHiddenLayer(5);
+            this.RandomGenerator = random;
 
             // Initialize the weights with random values between -1.0 and 1.0
             this.weights = this.neuralNet.GetAllWeights();
             for (int i = 0; i < this.weights.Count; i++)
             {
-                this.weights[i] = this.random.NextDouble() * 2.0 - 1.0;
+                this.weights[i] = this.RandomGenerator.NextDouble() * (weightMax - weightMin) - (weightMax - weightMin) / 2;
             }
             this.neuralNet.SetAllWeights(this.weights);
         }
@@ -65,7 +62,11 @@ namespace Lander
         public void Mutate()
         {
             this.weights = this.neuralNet.GetAllWeights();
-            this.weights[random.Next(this.weights.Count)] += this.random.NextDouble() - 0.5;
+            for (int i = 0; i < this.weights.Count / 100; i++)
+            {
+                this.weights[this.RandomGenerator.Next(this.weights.Count)] += this.RandomGenerator.NextDouble() * (weightMax - weightMin) - (weightMax - weightMin) / 2;
+                ////this.weights[Random.Next(this.weights.Count)] += this.Random.NextDouble() * 2.0 - 0.5;
+            }
             this.neuralNet.SetAllWeights(this.weights);
         }
 
@@ -93,7 +94,7 @@ namespace Lander
             {
                 case LanderIndividualSettings.CrossoverType.OnePoint:
                     // Copy the mate's weights into the first section
-                    int crossoverPoint = this.random.Next(this.weights.Count);
+                    int crossoverPoint = this.RandomGenerator.Next(this.weights.Count);
                     for (var i = 0; i < crossoverPoint; i++)
                     {
                         childWeights[i] = mateWeights[i];
@@ -104,7 +105,7 @@ namespace Lander
             }
 
             // Create the new child
-            LanderIndividual child = new LanderIndividual();
+            LanderIndividual child = new LanderIndividual(this.RandomGenerator);
             child.Settings = this.Settings;
             child.neuralNet.SetAllWeights(childWeights);
 
@@ -133,13 +134,18 @@ namespace Lander
         public double Fitness { get; set; }
 
         /// <summary>
+        /// Gets or sets the random number generator.
+        /// </summary>
+        public Random RandomGenerator { get; set; }
+
+        /// <summary>
         /// Updates the Fitness property by running a landing simulation.
         /// TODO implement running multiple simulations for varying environments.
         /// </summary>
         public void CalculateFitness()
         {
             List<double> inputs = new List<double>();
-            Lander lander = new Lander(this.settings.LanderEnvironment, this.settings.StartingFuel, this.settings.StartingHeight, this.settings.StartingHorizontal);
+            Lander lander = new Lander(this.settings.LanderEnvironment, this.settings.StartingFuel, this.settings.StartingHorizontal, this.settings.StartingHeight);
             IList<double> output;
 
             for (int i = 0; i < 7; i++)
@@ -174,17 +180,15 @@ namespace Lander
         /// <returns>A deep clone of the individual.</returns>
         public object Clone()
         {
-            LanderIndividual clone = new LanderIndividual();
+            LanderIndividual clone = new LanderIndividual(this.RandomGenerator);
 
             clone.neuralNet = new NeuralNetwork();
             clone.settings = this.settings;
-            clone.random = this.random;
 
             this.weights = this.neuralNet.GetAllWeights();
             clone.neuralNet.InputCount = this.neuralNet.InputCount;
             clone.neuralNet.OutputCount = this.neuralNet.OutputCount;
-            clone.neuralNet.AddHiddenLayer(8);
-            clone.neuralNet.AddHiddenLayer(8);
+            clone.neuralNet.AddHiddenLayer(5);
             clone.neuralNet.SetAllWeights(this.weights);
 
             return clone;
@@ -235,6 +239,26 @@ namespace Lander
             {
                 return this.neuralNet;
             }
+        }
+
+        /// <summary>
+        /// Compares genotypes
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public double CompareGenotype(IIndividual other)
+        {
+            List<double> otherweights = ((LanderIndividual)other).neuralNet.GetAllWeights();
+            this.weights = this.neuralNet.GetAllWeights();
+
+            double difference = 0;
+
+            for (int i = 0; i < this.weights.Count; i++)
+            {
+                difference += Math.Abs(this.weights[i] - otherweights[i]);
+            }
+
+            return difference;
         }
     }
 }

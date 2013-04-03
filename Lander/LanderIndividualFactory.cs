@@ -7,6 +7,7 @@
 namespace Lander
 {
     using GeneticAlgorithm;
+    using System;
 
     /// <summary>
     /// 
@@ -16,10 +17,23 @@ namespace Lander
         /// <summary>
         /// 
         /// </summary>
+        private Random randomGenerator;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public LanderIndividualFactory()
+        {
+            this.randomGenerator = new Random();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <returns></returns>
         public IIndividual CreateIndividual()
         {
-            return new LanderIndividual() { Settings = this.IndividualSettings };
+            return new LanderIndividual(this.randomGenerator) { Settings = this.IndividualSettings };
         }
 
         /// <summary>
