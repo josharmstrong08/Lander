@@ -164,7 +164,7 @@ namespace Lander.Model
             }
 
             // If the lander has landed, add some extra signals
-
+            fitness += this.startingFuel;
             if (this.Status == LanderStatus.Landed)
             {
                 /*
@@ -174,7 +174,7 @@ namespace Lander.Model
                                 ((this.Fuel + this.startingPositionY) - this.CurrentTime),
                                 0);
                  */
-                //fitness -= this.Fuel;
+                fitness -= this.Fuel;
             }
 
             return fitness;

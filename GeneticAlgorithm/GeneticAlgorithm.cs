@@ -10,6 +10,7 @@ namespace GeneticAlgorithm
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
 
     /// <summary>
     /// TODO: Update summary.
@@ -138,17 +139,22 @@ namespace GeneticAlgorithm
                 double differenceTotal = 0;
                 double minDifference = double.MaxValue;
                 double maxDifference = double.MinValue;
+                int differenceCount = 0;
                 for (int i = 0; i < currentPopulation.Count / 100; i++ )
                 {
                     foreach (var individual2 in currentPopulation)
                     {
-                        double difference = currentPopulation[i].CompareGenotype(individual2);
-                        differenceTotal += difference;
-                        if (difference < minDifference) minDifference = difference;
-                        if (difference > maxDifference) maxDifference = difference;
+                        if (individual2 != currentPopulation[i])
+                        {
+                            double difference = currentPopulation[i].CompareGenotype(individual2);
+                            differenceTotal += difference;
+                            if (difference < minDifference) minDifference = difference;
+                            if (difference > maxDifference) maxDifference = difference;
+                            differenceCount++;
+                        }
                     }
                 }
-                double averageDifference = differenceTotal / (currentPopulation.Count * currentPopulation.Count);
+                double averageDifference = differenceTotal / differenceCount;
 
                 // Raise an iteration event with current statistical info.
                 this.RaiseIterationEvent(new IterationEventArgs(
@@ -198,6 +204,64 @@ namespace GeneticAlgorithm
                         child.Mutate();
                     }
 
+                    ////// Now calculate the new child's fitness. 
+                    ////timerFitness.Restart();
+                    ////child.CalculateFitness();
+                    ////timerFitness.Stop();
+
+                    ////times.Add(timerFitness.Elapsed);
+                    ////calculations++;
+
+                    // Insert the child into the new population.
+                    newPopulation.Add(child);
+                }
+                
+                int halfpopcount = newPopulation.Count / 2;
+                List<IIndividual> firsthalf = newPopulation.GetRange(0, halfpopcount);
+                List<IIndividual> secondhalf = newPopulation.GetRange(halfpopcount, newPopulation.Count - halfpopcount);
+                Object calclock = new Object();
+
+                Thread workerThread1 = new Thread(() => {
+                    Stopwatch stopwatch = new Stopwatch();
+                    foreach (var child in firsthalf)
+                    {
+                        stopwatch.Restart();
+                        child.CalculateFitness();
+                        stopwatch.Stop();
+
+                        lock (calclock)
+                        {
+                            calculations++;
+                            times.Add(stopwatch.Elapsed);
+                        }
+                    }
+                });
+
+                Thread workerThread2 = new Thread(() =>
+                {
+                    Stopwatch stopwatch = new Stopwatch();
+                    foreach (var child in secondhalf)
+                    {
+                        stopwatch.Restart();
+                        child.CalculateFitness();
+                        stopwatch.Stop();
+
+                        lock (calclock)
+                        {
+                            calculations++;
+                            times.Add(stopwatch.Elapsed);
+                        }
+                    }
+                });
+
+                workerThread1.Start();
+                workerThread2.Start();
+                workerThread1.Join();
+                workerThread2.Join();
+                
+                /*
+                foreach (var child in newPopulation)
+                {
                     // Now calculate the new child's fitness. 
                     timerFitness.Restart();
                     child.CalculateFitness();
@@ -205,10 +269,8 @@ namespace GeneticAlgorithm
 
                     times.Add(timerFitness.Elapsed);
                     calculations++;
-
-                    // Insert the child into the new population.
-                    newPopulation.Add(child);
                 }
+                */
 
                 // Copy the new population into the current population.
                 // Note: List copies the reference of each item in this operation.

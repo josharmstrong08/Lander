@@ -41,6 +41,7 @@ namespace Lander
         /// </summary>
         public LanderIndividual(Random random)
         {
+            // NOTE: network topology defined here
             this.neuralNet = new NeuralNetwork();
             this.neuralNet.InputCount = 7;
             this.neuralNet.OutputCount = 2;
@@ -62,9 +63,10 @@ namespace Lander
         public void Mutate()
         {
             this.weights = this.neuralNet.GetAllWeights();
-            for (int i = 0; i < this.weights.Count / 100; i++)
+            for (int i = 0; i < this.weights.Count / (double)100; i++)
             {
-                this.weights[this.RandomGenerator.Next(this.weights.Count)] += this.RandomGenerator.NextDouble() * (weightMax - weightMin) - (weightMax - weightMin) / 2;
+                ////this.weights[this.RandomGenerator.Next(this.weights.Count)] += this.RandomGenerator.NextDouble() * (weightMax - weightMin) - (weightMax - weightMin) / 2;
+                this.weights[this.RandomGenerator.Next(this.weights.Count)] += this.RandomGenerator.NextDouble() * 0.2 - 0.1;
                 ////this.weights[Random.Next(this.weights.Count)] += this.Random.NextDouble() * 2.0 - 0.5;
             }
             this.neuralNet.SetAllWeights(this.weights);
@@ -122,6 +124,15 @@ namespace Lander
                         childWeights[i] = mateWeights[i];
                     }
                     break;
+                case LanderIndividualSettings.CrossoverType.Uniform:
+                    for (int i = 0; i < childWeights.Count; i++)
+                    {
+                        if (RandomGenerator.NextDouble() < 0.5)
+                        {
+                            childWeights[i] = mateWeights[i];
+                        }
+                    }
+                    break;
                 default:
                     throw new ArgumentException("Lander individual crossover type not supported");
             }
@@ -167,7 +178,8 @@ namespace Lander
         public void CalculateFitness()
         {
             List<double> inputs = new List<double>();
-            Lander lander = new Lander(this.settings.LanderEnvironment, this.settings.StartingFuel, this.settings.StartingHorizontal, this.settings.StartingHeight);
+            Model.Environment environment = new Model.Environment();
+            Lander lander = new Lander(environment, this.settings.StartingFuel, this.settings.StartingHorizontal, this.settings.StartingHeight);
             IList<double> output;
 
             for (int i = 0; i < 7; i++)
@@ -177,30 +189,36 @@ namespace Lander
 
             this.Fitness = 0;
 
-            for (int varGravity = 1; varGravity < 5; varGravity++)
-            {
-                this.settings.LanderEnvironment.Gravity = varGravity;
-                lander.Reset();
-                do
+            //for (int varWind = -2; varWind < 3; varWind++)
+            //{
+                //this.settings.LanderEnvironment.WindSpeed = varWind;
+            //    lander.Enviroment.WindSpeed = varWind;
+                for (double varGravity = 1; varGravity < 3; varGravity += 0.5)
                 {
-                    inputs[0] = lander.PositionX;
-                    inputs[1] = lander.PositionY;
-                    inputs[2] = lander.VelocityX;
-                    inputs[3] = lander.VelocityY;
-                    inputs[4] = this.settings.LanderEnvironment.WindSpeed;
-                    inputs[5] = this.settings.LanderEnvironment.Gravity;
-                    inputs[6] = lander.Fuel;
+                    //this.settings.LanderEnvironment.Gravity = varGravity;
+                    lander.Enviroment.Gravity = varGravity;
+                    lander.Reset();
+                    do
+                    {
+                        inputs[0] = lander.PositionX;
+                        inputs[1] = lander.PositionY;
+                        inputs[2] = lander.VelocityX;
+                        inputs[3] = lander.VelocityY;
+                        inputs[4] = lander.Enviroment.WindSpeed;    // this.settings.LanderEnvironment.WindSpeed;
+                        inputs[5] = varGravity; // this.settings.LanderEnvironment.Gravity;
+                        inputs[6] = lander.Fuel;
 
-                    output = this.neuralNet.Run(inputs);
-                    lander.Burn = output[0];
-                    lander.Thrust = output[1];
+                        output = this.neuralNet.Run(inputs);
+                        lander.Burn = output[0];
+                        lander.Thrust = output[1];
 
-                    lander.Update();
-                    this.settings.LanderEnvironment.Update();
-                } while (lander.Status == LanderStatus.Flying);
+                        lander.Update();
+                        //this.settings.LanderEnvironment.Update();
+                    } while (lander.Status == LanderStatus.Flying);
 
-                this.Fitness += lander.CalculateFitness();
-            }
+                    this.Fitness += lander.CalculateFitness();
+                }
+            //}
         }
 
         /// <summary>
@@ -214,6 +232,7 @@ namespace Lander
             clone.neuralNet = new NeuralNetwork();
             clone.settings = this.settings;
 
+            // NOTE: network topology defined here
             this.weights = this.neuralNet.GetAllWeights();
             clone.neuralNet.InputCount = this.neuralNet.InputCount;
             clone.neuralNet.OutputCount = this.neuralNet.OutputCount;

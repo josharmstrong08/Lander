@@ -17,7 +17,8 @@ namespace Lander.Model
         {
             this.random = new Random();
             this.Gravity = 2.0;
-            this.WindSpeed = 0.2 * (this.random.NextDouble() - 0.5);
+            //this.WindSpeed = 0.2 * (this.random.NextDouble() - 0.5);
+            this.WindSpeed = 0.1;
         }
 
         /// <summary>

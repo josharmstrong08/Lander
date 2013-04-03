@@ -1,6 +1,7 @@
 ﻿using ArtificialNeuralNetwork;
 using GeneticAlgorithm;
 using Lander;
+using Lander.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,6 @@ namespace LanderConsole
 {
     class Program
     {
-        private static Lander.Model.Lander lander;
-
-        private static Lander.Model.Environment environment;
-
         private static NeuralNetwork neuralNetwork;
 
         static void Main(string[] args)
@@ -24,8 +21,7 @@ namespace LanderConsole
             bool quit = false;
             string input;
 
-            environment = new Lander.Model.Environment();
-            lander = new Lander.Model.Lander(environment, 100, 0, 100);
+            // NOTE: network topology defined here
             neuralNetwork = new NeuralNetwork();
             neuralNetwork.InputCount = 7;
             neuralNetwork.OutputCount = 2;
@@ -45,11 +41,19 @@ namespace LanderConsole
                         break;
                     case "t":
                     case "train":
-                        Train();
+                        Train(true);
+                        break;
+                    case "tl":
+                    case "trainlong":
+                        TrainLong();
                         break;
                     case "r":
                     case "run":
                         RunSimulation();
+                        break;
+                    case "ra":
+                    case "runall":
+                        RunSimulationVarying();
                         break;
                     case "h":
                     case "help":
@@ -63,12 +67,40 @@ namespace LanderConsole
                     case "reset":
                         ResetNetwork();
                         break;
+                    case "rg":
+                    case "rungeneralize":
+                        RunSimulationGeneralize();
+                        break;
                     default:
                         Console.WriteLine("Unrecognized command. Try 'help'");
                         break;
                 }
             }
         }
+
+        private static void TrainLong()
+        {
+            double minFitness = double.MaxValue;
+            double maxFitness = double.MinValue;
+            double totalFitness = 0;
+            double minLandedPercentage = double.MaxValue;
+            double maxLandedPercentage = double.MinValue;
+            NeuralNetwork bestNetwork;
+            double totalLandedPercentage = 0;
+            
+            for (int i = 0; i < 10; i++)
+            {
+                double fitness = Train(false);
+                double percentage = RunSimulationVarying(false);
+
+                if (fitness < minFitness) minFitness = fitness;
+                if (fitness > maxFitness) maxFitness = fitness;
+                
+                if ()
+
+            }
+        }
+
 
         private static void PrintNetwork()
         {
@@ -78,25 +110,110 @@ namespace LanderConsole
         private static void PrintHelp()
         {
             Console.WriteLine("t (train): Train lander with ga");
+            Console.WriteLine("tl (trainlong): Train lander with ga, time intensive");
             Console.WriteLine("rs (reset): Reset lander training");
-            Console.WriteLine("r (run): Run simulation");
+            Console.WriteLine("r (run): Run simulation with random fixed parameters");
+            Console.WriteLine("ra (runall): Run simulation with varying parameters");
+            Console.WriteLine("rg (rungeneralize): Run the simulation with varying extra parameters");
             Console.WriteLine("q (quit): Quit program");
             Console.WriteLine("h (help): Display this help message");
             Console.WriteLine("p (print): Print out the current neural network");
         }
 
+        private static void RunSimulationGeneralize()
+        {
+            int timesCrashed = 0;
+            int timesLanded = 0;
+            int runCount = 0;
+
+            for (double varGravity = 0.1; varGravity < 1.0; varGravity += 0.1)
+            {
+                if (RunOneSimulation(false, 0, 100, 100, 0.1, varGravity) == LanderStatus.Crashed)
+                {
+                    timesCrashed++;
+                }
+                else
+                {
+                    timesLanded++;
+                }
+
+                runCount++;
+            }
+
+            for (double varGravity = 3.0; varGravity < 4.0; varGravity += 0.1)
+            {
+                if (RunOneSimulation(false, 0, 100, 100, 0.1, varGravity) == LanderStatus.Crashed)
+                {
+                    timesCrashed++;
+                }
+                else
+                {
+                    timesLanded++;
+                }
+
+                runCount++;
+            }
+
+            Console.WriteLine("Crashed: {0:p}", timesCrashed / (double)runCount);
+            Console.WriteLine("Landed:  {0:p}", timesLanded / (double)runCount);
+        }
+
+        private static double RunSimulationVarying(bool showOutput)
+        {
+            int timesCrashed = 0;
+            int timesLanded = 0;
+            int runCount = 0;
+
+            for (double varGravity = 1.0; varGravity < 3.0; varGravity += 0.1)
+            {
+                if (RunOneSimulation(false, 0, 100, 100, 0.1, varGravity) == LanderStatus.Crashed)
+                {
+                    timesCrashed++;
+                }
+                else
+                {
+                    timesLanded++;
+                }
+
+                runCount++;
+            }
+
+            if (showOutput == true)
+            {
+                Console.WriteLine("Crashed: {0:p}", timesCrashed / (double)runCount);
+                Console.WriteLine("Landed:  {0:p}", timesLanded / (double)runCount);
+            }
+
+            return timesLanded / (double)runCount;
+        }
+
         private static void RunSimulation()
+        {
+            Random rand = new Random();
+
+            RunOneSimulation(true, 0, 100, 100, 0.1, rand.NextDouble() * 2.0 + 1.0);
+        }
+
+        /// <summary>
+        /// Runs the simulation with given starting variables.
+        /// </summary>
+        /// <returns></returns>
+        private static LanderStatus RunOneSimulation(bool showOutput, double positionx, double positiony,
+            double fuel, double windspeed, double gravity)
         {
             // First query the neural net to see how it reacts to the current conditions. 
             // Then update the conditions. 
             bool stop = false;
 
-            Console.WriteLine("(X,Y,Vx,Vy,Fuel,Wind,Gravity) => (Burn,Thrust)");
+            if (showOutput)
+            {
+                Console.WriteLine("(X,Y,Vx,Vy,Fuel,Wind,Gravity) => (Burn,Thrust)");
+            }
 
-            lander.Reset();
-
-            Random rand = new Random();
-            environment.Gravity = rand.Next(1, 5);
+            Lander.Model.Environment env = new Lander.Model.Environment();
+            env.Gravity = gravity;
+            env.WindSpeed = windspeed;
+            Lander.Model.Lander lander = new Lander.Model.Lander(env, fuel, positionx, positiony);
 
             while (stop == false)
             {
@@ -106,11 +223,12 @@ namespace LanderConsole
                 inputs.Add(lander.PositionY);
                 inputs.Add(lander.VelocityX);
                 inputs.Add(lander.VelocityY);
-                inputs.Add(environment.WindSpeed);
-                inputs.Add(environment.Gravity);
+                inputs.Add(env.WindSpeed);
+                inputs.Add(env.Gravity);
                 inputs.Add(lander.Fuel);
 
                 IList<double> output = neuralNetwork.Run(inputs);
+
                 lander.Burn = output[0];
                 lander.Thrust = output[1];
 
@@ -121,31 +239,46 @@ namespace LanderConsole
                     stop = true;
                 }
 
-                Console.CursorLeft = 0;
-                switch (lander.Status)
-                {
-                    case Lander.Model.LanderStatus.Flying:
-                        Console.Write("Flying:  ");
-                        break;
-                    case Lander.Model.LanderStatus.Landed:
-                        Console.Write("Landed:  ");
-                        break;
-                    case Lander.Model.LanderStatus.Crashed:
-                        Console.Write("Crashed: ");
-                        break;
+                if (showOutput)
+                { 
+                    Console.CursorLeft = 0;
+                    switch (lander.Status)
+                    {
+                        case Lander.Model.LanderStatus.Flying:
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            Console.Write("Flying:  ");
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            break;
+                        case Lander.Model.LanderStatus.Landed:
+                            Console.BackgroundColor = ConsoleColor.Green;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.Write("Landed:  ");
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                            break;
+                        case Lander.Model.LanderStatus.Crashed:
+                            Console.BackgroundColor = ConsoleColor.Red;
+                            Console.Write("Crashed: ");
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            break;
+                    }
+
+                    Console.Write("({0,6:f2},{1,6:f2},{2,6:f2},{3,6:f2},{4,6:f2},{5,6:f2},{6,6:f2}) => ({7,6:f2},{8,6:f2})",
+                        lander.PositionX, lander.PositionY, lander.VelocityX, lander.VelocityY, lander.Fuel,
+                        env.WindSpeed, env.Gravity, output[0], output[1]);
+                    Thread.Sleep(250);
                 }
 
-                Console.Write("({0,6:f2},{1,6:f2},{2,6:f2},{3,6:f2},{4,6:f2},{5,6:f2},{6,6:f2}) => ({7,6:f2},{8,6:f2})",
-                    lander.PositionX, lander.PositionY, lander.VelocityX, lander.VelocityY, lander.Fuel,
-                    environment.WindSpeed, environment.Gravity, output[0], output[1]);
-
-                environment.Update();
-
-                Thread.Sleep(250);
+                env.Update();
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Fitness: {0:f3}", lander.CalculateFitness());
+            if (showOutput)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Fitness: {0:f3}", lander.CalculateFitness());
+            }
+
+            return lander.Status;
         }
 
         private static void ResetNetwork()
@@ -158,48 +291,57 @@ namespace LanderConsole
             neuralNetwork.SetAllWeights(weights);
         }
 
-        private static void Train()
+        private static double Train(bool showOutput)
         {
             LanderIndividualSettings landerIndividualSettings = new LanderIndividualSettings();
             LanderIndividualFactory landerFactory = new LanderIndividualFactory();
             GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm(landerFactory);
             LanderIndividual best = null;
             int currentIteration = 0;
+            double bestfitness = 0;
 
             // Set up the ga
+            Lander.Model.Environment environment = new Lander.Model.Environment();
             environment.Gravity = 2.0;
             environment.WindSpeed = 0.1;
             landerIndividualSettings.StartingFuel = 100;
             landerIndividualSettings.StartingHeight = 100;
             landerIndividualSettings.StartingHorizontal = 0;
             landerIndividualSettings.LanderEnvironment = environment;
-            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.TwoPoint;
+            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.Uniform;
             ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
-            //ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.RouletteWheel;
-            ga.TournamentSize = 3;
-            ga.CrossoverProbability = 0.99;
+            ga.TournamentSize = 5;
+            ga.CrossoverProbability = 0.98;
             ga.MutationProbability = 1;
-            ga.CalculationLimit = 80000;
-            ga.ElitistCount = 3h;
+            ga.CalculationLimit = 60000;
+            ga.ElitistCount = 10;
             ga.PopulationSize = 500;
             landerFactory.IndividualSettings = landerIndividualSettings;
 
             // This lambda function handles the iteration events from the ga.
             EventHandler<IterationEventArgs> handler = (sender, args) =>
             {
-                Console.CursorLeft = 0;
-                Console.Write("{0,4:g}\t{1,4:f3}\t{2,4:f3}\t{3,4:f3}\t{4,4:f3}\t{5,4:f3}\t{6,4:f3}", 
-                    currentIteration, 
-                    args.MinFitness, args.AverageFitness, args.MaxFitness, 
-                    args.MinDifference, args.AverageDifference, args.MaxDifference);
+                if (showOutput)
+                {
+                    Console.CursorLeft = 0;
+                    Console.Write("{0,4:g}{1,12:f3}{2,12:f3}{3,12:f3}{4,12:f3}{5,12:f3}{6,12:f3}",
+                        currentIteration,
+                        args.MinFitness, args.AverageFitness, args.MaxFitness,
+                        args.MinDifference, args.AverageDifference, args.MaxDifference);
+                }
+
                 currentIteration++;
+                bestfitness = args.MinFitness;
             };
 
             ga.IterationEvent += handler;
 
-            Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", 
+            if (showOutput)
+            {
+                Console.WriteLine("{0,4}{1,12}{2,12}{3,12}{4,12}{5,12}{6,12}",
                 "", "Min Fit", "Avg Fit", "Max Fit",
                 "Min Dif", "Avg Dif", "Max Dif");
+            }
 
             // Run the ga
             best = (LanderIndividual)ga.Run(landerIndividualSettings);
@@ -208,6 +350,8 @@ namespace LanderConsole
             neuralNetwork.SetAllWeights(best.CurrentNeuralNetwork.GetAllWeights());
 
             ga.IterationEvent -= handler;
+
+            return bestfitness;
         }
     }
 }
