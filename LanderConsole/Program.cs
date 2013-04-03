@@ -59,6 +59,10 @@ namespace LanderConsole
                     case "print":
                         PrintNetwork();
                         break;
+                    case "rs":
+                    case "reset":
+                        ResetNetwork();
+                        break;
                     default:
                         Console.WriteLine("Unrecognized command. Try 'help'");
                         break;
@@ -74,6 +78,7 @@ namespace LanderConsole
         private static void PrintHelp()
         {
             Console.WriteLine("t (train): Train lander with ga");
+            Console.WriteLine("rs (reset): Reset lander training");
             Console.WriteLine("r (run): Run simulation");
             Console.WriteLine("q (quit): Quit program");
             Console.WriteLine("h (help): Display this help message");
@@ -90,14 +95,17 @@ namespace LanderConsole
 
             lander.Reset();
 
+            Random rand = new Random();
+            environment.Gravity = rand.Next(1, 5);
+
             while (stop == false)
             {
                 // height, xPosition, Yvelocity, Xvelocity, wind, acceleration, and fuel.
                 List<double> inputs = new List<double>();
                 inputs.Add(lander.PositionX);
                 inputs.Add(lander.PositionY);
-                inputs.Add(lander.VelocityY);
                 inputs.Add(lander.VelocityX);
+                inputs.Add(lander.VelocityY);
                 inputs.Add(environment.WindSpeed);
                 inputs.Add(environment.Gravity);
                 inputs.Add(lander.Fuel);
@@ -127,21 +135,27 @@ namespace LanderConsole
                         break;
                 }
 
-                Console.Write("({0:f2},{1:f2},{2:f2},{3:f2},{4:f2},{5:f2},{6:f2}) => ({7:f2},{8:f2})",
+                Console.Write("({0,6:f2},{1,6:f2},{2,6:f2},{3,6:f2},{4,6:f2},{5,6:f2},{6,6:f2}) => ({7,6:f2},{8,6:f2})",
                     lander.PositionX, lander.PositionY, lander.VelocityX, lander.VelocityY, lander.Fuel,
                     environment.WindSpeed, environment.Gravity, output[0], output[1]);
 
                 environment.Update();
 
-                Thread.Sleep(1000);
+                Thread.Sleep(250);
             }
 
             Console.WriteLine();
+            Console.WriteLine("Fitness: {0:f3}", lander.CalculateFitness());
         }
 
-        static void timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void ResetNetwork()
         {
-            throw new NotImplementedException();
+            List<double> weights = neuralNetwork.GetAllWeights();
+            for (int i = 0; i < weights.Count; i++)
+            {
+                weights[0] = 0;
+            }
+            neuralNetwork.SetAllWeights(weights);
         }
 
         private static void Train()
@@ -159,21 +173,22 @@ namespace LanderConsole
             landerIndividualSettings.StartingHeight = 100;
             landerIndividualSettings.StartingHorizontal = 0;
             landerIndividualSettings.LanderEnvironment = environment;
-            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.OnePoint;
+            landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.TwoPoint;
             ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
+            //ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.RouletteWheel;
             ga.TournamentSize = 3;
             ga.CrossoverProbability = 0.99;
             ga.MutationProbability = 1;
-            ga.CalculationLimit = 40000;
-            ga.ElitistCount = 3;
-            ga.PopulationSize = 100;
+            ga.CalculationLimit = 80000;
+            ga.ElitistCount = 3h;
+            ga.PopulationSize = 500;
             landerFactory.IndividualSettings = landerIndividualSettings;
 
             // This lambda function handles the iteration events from the ga.
             EventHandler<IterationEventArgs> handler = (sender, args) =>
             {
                 Console.CursorLeft = 0;
-                Console.Write("{0:g}\t{1:f3}\t{2:f3}\t{3:f3}\t{4:f3}\t{5:f3}\t{6:f3}", 
+                Console.Write("{0,4:g}\t{1,4:f3}\t{2,4:f3}\t{3,4:f3}\t{4,4:f3}\t{5,4:f3}\t{6,4:f3}", 
                     currentIteration, 
                     args.MinFitness, args.AverageFitness, args.MaxFitness, 
                     args.MinDifference, args.AverageDifference, args.MaxDifference);

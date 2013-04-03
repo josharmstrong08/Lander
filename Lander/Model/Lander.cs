@@ -107,7 +107,7 @@ namespace Lander.Model
             }
             else
             {
-                this.VelocityX += Math.Abs(this.Thrust) * (this.Thrust / Math.Abs(this.Thrust));
+                this.VelocityX += this.Thrust;
             }
             this.Fuel = Math.Max(this.Fuel - Math.Abs(this.Thrust), 0);
 
@@ -121,7 +121,7 @@ namespace Lander.Model
                 // We are still in the air, so flying.
                 this.Status = LanderStatus.Flying;
             }
-            else if (this.VelocityY > this.MaxLandingVelocity ||
+            else if (this.VelocityY < this.MaxLandingVelocity ||
               this.PositionX < this.MinSafeX ||
               this.PositionX > this.MaxSafeX)
             {
@@ -150,9 +150,10 @@ namespace Lander.Model
         /// <returns>The fitness of the lander</returns>
         public double CalculateFitness()
         {
-            //double fitness = Math.Min(0, this.VelocityY - this.MaxLandingVelocity);
-            double fitness = this.MaxLandingVelocity - this.velocityY;
+            // Add to the fitness the positive difference between velocity and max velocity
+            double fitness = Math.Max(0, this.MaxLandingVelocity - this.velocityY);
 
+            // Add to the fitness the positive difference between x and max/min safe x
             if (this.PositionX < this.MinSafeX)
             {
                 fitness += this.MinSafeX - this.PositionX;
@@ -160,6 +161,20 @@ namespace Lander.Model
             else if (this.PositionX > this.MaxSafeX)
             {
                 fitness += this.PositionX - this.MaxSafeX;
+            }
+
+            // If the lander has landed, add some extra signals
+
+            if (this.Status == LanderStatus.Landed)
+            {
+                /*
+                fitness -= Math.Max(
+                                (this.VelocityY - this.MaxLandingVelocity) +
+                                (this.Fuel) +
+                                ((this.Fuel + this.startingPositionY) - this.CurrentTime),
+                                0);
+                 */
+                //fitness -= this.Fuel;
             }
 
             return fitness;

@@ -100,6 +100,28 @@ namespace Lander
                         childWeights[i] = mateWeights[i];
                     }
                     break;
+                case LanderIndividualSettings.CrossoverType.TwoPoint:
+                    // Copy the mate's weights into the first section
+                    int firstPoint = this.RandomGenerator.Next(this.weights.Count);
+                    int secondPoint = this.RandomGenerator.Next(this.weights.Count);
+
+                    if (secondPoint < firstPoint)
+                    {
+                        int temp = firstPoint;
+                        firstPoint = secondPoint;
+                        secondPoint = temp;
+                    }
+
+                    for (var i = 0; i < firstPoint; i++)
+                    {
+                        childWeights[i] = mateWeights[i];
+                    }
+
+                    for (var i = secondPoint; i < childWeights.Count; i++)
+                    {
+                        childWeights[i] = mateWeights[i];
+                    }
+                    break;
                 default:
                     throw new ArgumentException("Lander individual crossover type not supported");
             }
@@ -153,25 +175,32 @@ namespace Lander
                 inputs.Add(0);
             }
 
-            do
+            this.Fitness = 0;
+
+            for (int varGravity = 1; varGravity < 5; varGravity++)
             {
-                inputs[0] = lander.PositionX;
-                inputs[1] = lander.PositionY;
-                inputs[2] = lander.VelocityX;
-                inputs[3] = lander.VelocityY;
-                inputs[4] = this.settings.LanderEnvironment.WindSpeed;
-                inputs[5] = this.settings.LanderEnvironment.Gravity;
-                inputs[6] = lander.Fuel;
+                this.settings.LanderEnvironment.Gravity = varGravity;
+                lander.Reset();
+                do
+                {
+                    inputs[0] = lander.PositionX;
+                    inputs[1] = lander.PositionY;
+                    inputs[2] = lander.VelocityX;
+                    inputs[3] = lander.VelocityY;
+                    inputs[4] = this.settings.LanderEnvironment.WindSpeed;
+                    inputs[5] = this.settings.LanderEnvironment.Gravity;
+                    inputs[6] = lander.Fuel;
 
-                output = this.neuralNet.Run(inputs);
-                lander.Burn = output[0];
-                lander.Thrust = output[1];
+                    output = this.neuralNet.Run(inputs);
+                    lander.Burn = output[0];
+                    lander.Thrust = output[1];
 
-                lander.Update();
-                this.settings.LanderEnvironment.Update();
-            } while (lander.Status == LanderStatus.Flying);
+                    lander.Update();
+                    this.settings.LanderEnvironment.Update();
+                } while (lander.Status == LanderStatus.Flying);
 
-            this.Fitness = lander.CalculateFitness();
+                this.Fitness += lander.CalculateFitness();
+            }
         }
 
         /// <summary>
