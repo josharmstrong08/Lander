@@ -53,7 +53,7 @@ namespace LanderConsole
                         break;
                     case "ra":
                     case "runall":
-                        RunSimulationVarying();
+                        RunSimulationVarying(true);
                         break;
                     case "h":
                     case "help":
@@ -95,8 +95,6 @@ namespace LanderConsole
 
                 if (fitness < minFitness) minFitness = fitness;
                 if (fitness > maxFitness) maxFitness = fitness;
-                
-                if ()
 
             }
         }
@@ -164,19 +162,22 @@ namespace LanderConsole
             int timesLanded = 0;
             int runCount = 0;
 
-            for (double varGravity = 1.0; varGravity < 3.0; varGravity += 0.1)
-            {
-                if (RunOneSimulation(false, 0, 100, 100, 0.1, varGravity) == LanderStatus.Crashed)
+            //for (double varWind = -1.0; varWind <= 1.0; varWind += 0.1)
+            //{
+                for (double varGravity = 1.0; varGravity < 3.0; varGravity += 0.1)
                 {
-                    timesCrashed++;
-                }
-                else
-                {
-                    timesLanded++;
-                }
+                    if (RunOneSimulation(false, 0, 100, 100, 0.1, varGravity) == LanderStatus.Crashed)
+                    {
+                        timesCrashed++;
+                    }
+                    else
+                    {
+                        timesLanded++;
+                    }
 
-                runCount++;
-            }
+                    runCount++;
+                }
+            //}
 
             if (showOutput == true)
             {
@@ -191,7 +192,9 @@ namespace LanderConsole
         {
             Random rand = new Random();
 
+            //RunOneSimulation(true, 0, 100, 100, rand.NextDouble() * 2.0 - 1.0, rand.NextDouble() * 2.0 + 1.0);
             RunOneSimulation(true, 0, 100, 100, 0.1, rand.NextDouble() * 2.0 + 1.0);
+            //RunOneSimulation(true, 0, 100, 100, 0.1, 2.0);
         }
 
         /// <summary>

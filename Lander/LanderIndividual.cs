@@ -189,9 +189,9 @@ namespace Lander
 
             this.Fitness = 0;
 
-            //for (int varWind = -2; varWind < 3; varWind++)
+            //for (double varWind = -1.0; varWind < 1.0; varWind += 0.1)
             //{
-                //this.settings.LanderEnvironment.WindSpeed = varWind;
+            //    this.settings.LanderEnvironment.WindSpeed = varWind;
             //    lander.Enviroment.WindSpeed = varWind;
                 for (double varGravity = 1; varGravity < 3; varGravity += 0.5)
                 {
@@ -205,7 +205,7 @@ namespace Lander
                         inputs[2] = lander.VelocityX;
                         inputs[3] = lander.VelocityY;
                         inputs[4] = lander.Enviroment.WindSpeed;    // this.settings.LanderEnvironment.WindSpeed;
-                        inputs[5] = varGravity; // this.settings.LanderEnvironment.Gravity;
+                        inputs[5] = lander.Enviroment.Gravity;      // varGravity; // this.settings.LanderEnvironment.Gravity;
                         inputs[6] = lander.Fuel;
 
                         output = this.neuralNet.Run(inputs);
