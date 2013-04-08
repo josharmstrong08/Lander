@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Lander
+namespace LanderSimulator
 {
     using ArtificialNeuralNetwork;
     using GeneticAlgorithm;

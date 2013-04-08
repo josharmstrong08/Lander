@@ -2,12 +2,12 @@ using ArtificialNeuralNetwork;
 using GeneticAlgorithm;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using Lander.Model;
+using LanderSimulator.Model;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
 using System.Windows;
-using Lander;
+using LanderSimulator;
 using System.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
@@ -78,9 +78,9 @@ namespace LanderUI.ViewModel
 
         private bool isTraining = false;
 
-        private Lander.Model.Environment environment;
+        private LanderSimulator.Model.Environment environment;
 
-        private Lander.Model.Lander lander;
+        private LanderSimulator.Model.Lander lander;
 
         private double landerPositionY = 0;
 
@@ -105,8 +105,8 @@ namespace LanderUI.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            this.environment = new Lander.Model.Environment();
-            this.lander = new Lander.Model.Lander(this.environment, 100, 0, 100);
+            this.environment = new LanderSimulator.Model.Environment();
+            this.lander = new LanderSimulator.Model.Lander(this.environment, 100, 0, 100);
             timer = new Timer(10);
             timer.Elapsed += new ElapsedEventHandler(UpdateLanderPosition);
             timer.AutoReset = true;
@@ -274,7 +274,7 @@ namespace LanderUI.ViewModel
             this.LanderPositionX = this.lander.PositionX;
             this.LanderPositionY = this.lander.PositionY;
             RaisePropertyChanged(LanderStatusPropertyName);
-            if (this.lander.Status != Lander.Model.LanderStatus.Flying)
+            if (this.lander.Status != LanderSimulator.Model.LanderStatus.Flying)
             {
                 this.timer.Stop();
             }
@@ -383,11 +383,11 @@ namespace LanderUI.ViewModel
             {
                 switch (this.lander.Status)
                 {
-                    case Lander.Model.LanderStatus.Flying:
+                    case LanderSimulator.Model.LanderStatus.Flying:
                         return "Flying";
-                    case Lander.Model.LanderStatus.Landed:
+                    case LanderSimulator.Model.LanderStatus.Landed:
                         return "Landed";
-                    case Lander.Model.LanderStatus.Crashed:
+                    case LanderSimulator.Model.LanderStatus.Crashed:
                         return "Crashed";
                     default:
                         return "Unknown Status";

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Lander.Model
+namespace LanderSimulator.Model
 {
     public enum LanderStatus
     {

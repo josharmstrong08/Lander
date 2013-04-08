@@ -1,17 +1,19 @@
-﻿using ArtificialNeuralNetwork;
-using GeneticAlgorithm;
-using Lander;
-using Lander.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
+﻿// -----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Josh Armstrong">
+// TODO: Update copyright text.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace LanderConsole
 {
+    using ArtificialNeuralNetwork;
+    using GeneticAlgorithm;
+    using Lander;
+    using Lander.Model;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+
     class Program
     {
         private static NeuralNetwork neuralNetwork;

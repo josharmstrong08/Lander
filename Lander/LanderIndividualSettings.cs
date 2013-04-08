@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Lander
+namespace LanderSimulator
 {
     using GeneticAlgorithm;
     using Model;

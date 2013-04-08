@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Lander.Model;
+using LanderSimulator.Model;
 
 namespace UnitTests
 {
@@ -11,8 +11,8 @@ namespace UnitTests
         public void SanityCheck()
         {
             // Check that the lander will crash with the default settings
-            Lander.Model.Environment environment = new Lander.Model.Environment();
-            Lander.Model.Lander lander = new Lander.Model.Lander(environment, 100, 0, 100);
+            LanderSimulator.Model.Environment environment = new LanderSimulator.Model.Environment();
+            LanderSimulator.Model.Lander lander = new LanderSimulator.Model.Lander(environment, 100, 0, 100);
             bool crashed = false;
             for (int i = 0; i < 100; i++)
             {
