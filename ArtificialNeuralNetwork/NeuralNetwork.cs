@@ -13,7 +13,7 @@ namespace ArtificialNeuralNetwork
     using MathNet.Numerics.LinearAlgebra.Double;
 
     /// <summary>
-    /// Provides functions to create and run a simply multi-layer artificial neural network.
+    /// Provides functions to create and run a simple multi-layer artificial neural network.
     /// Weights can be modified after initialization via the <see cref="GetAllWeights"/> and 
     /// <see cref="SetAllWeights"/> functions. 
     /// </summary>
@@ -104,6 +104,7 @@ namespace ArtificialNeuralNetwork
             ////Debug.WriteLine("Input: ");
             ////Debug.WriteLine(current.ToString());
 
+            // Multiply each hidden lay matrix
             foreach (var matrix in this.weights)
             {
                 ////Debug.WriteLine("Hidden layer:");
@@ -133,6 +134,8 @@ namespace ArtificialNeuralNetwork
             ////Debug.WriteLine("*");
             ////Debug.WriteLine(this.outputweights.ToString());
             ////Debug.WriteLine("=");
+
+            // Multiply the final output weight matrix
             current = current * this.outputweights;
             ////Debug.WriteLine(current.ToString());
 
@@ -145,18 +148,27 @@ namespace ArtificialNeuralNetwork
             for (var col = 0; col < current.ColumnCount; col++)
             {
                 output.Add(current[0, col]);
-                //output.Add(this.CalculateActivation(current[0, col]));
+
+                // It is common for the outputs to go through activation as well, this line
+                // will do that. I chose not to do it this way
+                ////output.Add(this.CalculateActivation(current[0, col]));
             }
             
             return output;
         }
 
         /// <summary>
-        /// Adds a new hidden layer right behind the output layer. 
+        /// Adds a new hidden layer right behind the output layer. This will 
+        /// reset all the weights already set in the output layer; all the layers
+        /// should be set up before weights are adjusted anyways. 
         /// </summary>
         /// <param name="nodecount">The number of nodes in the hidden layer.</param>
         public void AddHiddenLayer(int nodecount)
         {
+            // The size of the hidden layer matrix varies with the size of the 
+            // matrix to it's left (either the input layer or another hidden layer),
+            // and the output weight matrix size will always change based on new matrix 
+            // size. 
             if (this.weights.Count == 0)
             {
                 this.weights.Add(new DenseMatrix(this.inputCount, nodecount));
@@ -170,7 +182,7 @@ namespace ArtificialNeuralNetwork
         }
 
         /// <summary>
-        /// Returns a list of all the weights in the network. Generally these values should modified
+        /// Returns a list of all the weights in the network. These values should modified
         /// and then passed back to <see cref="SetAllWeights"/>. 
         /// </summary>
         /// <returns>A list containing all the weights in the network.</returns>
@@ -209,11 +221,13 @@ namespace ArtificialNeuralNetwork
             }
             else
             {
+                // TODO: Check the number of weights passed in and throw exception as necessary
+
                 int currentIndex = 0;
                 int rowCount = 0;
                 int colCount = 0;
 
-                // There are some hidden layers. 
+                // There is at least one hidden layer. More than one requires a loop
                 if (this.weights.Count == 1)
                 {
                     // Just one layer
