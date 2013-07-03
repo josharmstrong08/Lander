@@ -8,6 +8,7 @@ namespace ArtificialNeuralNetwork
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using MathNet.Numerics;
     using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -278,10 +279,10 @@ namespace ArtificialNeuralNetwork
             foreach (var matrix in this.weights)
             {
 
-                output += matrix.ToString("f1") + "\n\n";
+                output += matrix.ToString("f1", new NumberFormatInfo()) + "\n\n";
             }
 
-            output += this.outputweights.ToString("f1") + "\n";
+            output += this.outputweights.ToString("f1", new NumberFormatInfo()) + "\n";
             return output;
         }
     }

@@ -8,8 +8,8 @@ namespace LanderConsole
 {
     using ArtificialNeuralNetwork;
     using GeneticAlgorithm;
-    using Lander;
-    using Lander.Model;
+    using LanderSimulator;
+    using LanderSimulator.Model;
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -215,10 +215,10 @@ namespace LanderConsole
                 Console.WriteLine("(X,Y,Vx,Vy,Fuel,Wind,Gravity) => (Burn,Thrust)");
             }
 
-            Lander.Model.Environment env = new Lander.Model.Environment();
+            LanderSimulator.Model.Environment env = new LanderSimulator.Model.Environment();
             env.Gravity = gravity;
             env.WindSpeed = windspeed;
-            Lander.Model.Lander lander = new Lander.Model.Lander(env, fuel, positionx, positiony);
+            LanderSimulator.Model.Lander lander = new LanderSimulator.Model.Lander(env, fuel, positionx, positiony);
 
             while (stop == false)
             {
@@ -239,7 +239,7 @@ namespace LanderConsole
 
                 lander.Update();
 
-                if (lander.Status != Lander.Model.LanderStatus.Flying)
+                if (lander.Status != LanderSimulator.Model.LanderStatus.Flying)
                 {
                     stop = true;
                 }
@@ -249,19 +249,19 @@ namespace LanderConsole
                     Console.CursorLeft = 0;
                     switch (lander.Status)
                     {
-                        case Lander.Model.LanderStatus.Flying:
+                        case LanderSimulator.Model.LanderStatus.Flying:
                             Console.BackgroundColor = ConsoleColor.Black;
                             Console.Write("Flying:  ");
                             Console.BackgroundColor = ConsoleColor.Black;
                             break;
-                        case Lander.Model.LanderStatus.Landed:
+                        case LanderSimulator.Model.LanderStatus.Landed:
                             Console.BackgroundColor = ConsoleColor.Green;
                             Console.ForegroundColor = ConsoleColor.Black;
                             Console.Write("Landed:  ");
                             Console.BackgroundColor = ConsoleColor.Black;
                             Console.ForegroundColor = ConsoleColor.Gray;
                             break;
-                        case Lander.Model.LanderStatus.Crashed:
+                        case LanderSimulator.Model.LanderStatus.Crashed:
                             Console.BackgroundColor = ConsoleColor.Red;
                             Console.Write("Crashed: ");
                             Console.BackgroundColor = ConsoleColor.Black;
@@ -300,13 +300,13 @@ namespace LanderConsole
         {
             LanderIndividualSettings landerIndividualSettings = new LanderIndividualSettings();
             LanderIndividualFactory landerFactory = new LanderIndividualFactory();
-            GeneticAlgorithm.GeneticAlgorithm ga = new GeneticAlgorithm.GeneticAlgorithm(landerFactory);
+            GeneticAlgorithm ga = new GeneticAlgorithm(landerFactory);
             LanderIndividual best = null;
             int currentIteration = 0;
             double bestfitness = 0;
 
             // Set up the ga
-            Lander.Model.Environment environment = new Lander.Model.Environment();
+            LanderSimulator.Model.Environment environment = new LanderSimulator.Model.Environment();
             environment.Gravity = 2.0;
             environment.WindSpeed = 0.1;
             landerIndividualSettings.StartingFuel = 100;
@@ -314,7 +314,7 @@ namespace LanderConsole
             landerIndividualSettings.StartingHorizontal = 0;
             landerIndividualSettings.LanderEnvironment = environment;
             landerIndividualSettings.CrossoverAlgorithm = LanderIndividualSettings.CrossoverType.Uniform;
-            ga.SelectionType = GeneticAlgorithm.GeneticAlgorithm.SelectionTypes.Tournament;
+            ga.SelectionType = GeneticAlgorithm.SelectionTypes.Tournament;
             ga.TournamentSize = 5;
             ga.CrossoverProbability = 0.98;
             ga.MutationProbability = 1;
